@@ -1,6 +1,5 @@
-require('dotenv').config({
-  path: 'C:/Users/RYAN/Desktop/Meu chatbot Lisa/.env'
-});
+require('dotenv').config(); // lê o .env que está na mesma pasta do server.js
+
 console.log('✅ GROQ_API_KEY:', process.env.GROQ_API_KEY);
 
 const express = require('express');
