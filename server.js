@@ -1,194 +1,196 @@
-require('dotenv').config({
-  path: 'C:/Users/RYAN/Desktop/Meu chatbot Lisa/.env'
-});
+// ================== LOAD ENV ==================
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config({ path: __dirname + '/.env' });
+}
+
 console.log('✅ GROQ_API_KEY:', process.env.GROQ_API_KEY);
 
+// ================== IMPORTS ==================
 const express = require('express');
-const Groq = require('groq-sdk');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
+const Groq = require('groq-sdk');
 
+const scoringEngine = require('./core/scoringEngine.js');
+const memoryEngine = require('./core/memoryEngine.js');
+const decisionEngine = require('./core/decisionEngine.js');
+const stateDetector = require('./core/stateDetector.js');
+const promptStrategyEngine = require('./core/promptStrategyEngine.js');
+const promptComposer = require('./core/promptComposer.js');
+const silence = require('./core/silence.js');
+const strategyEngine = require('./core/strategyEngine.js');
+
+// ================== VALIDATION ==================
+if (!process.env.GROQ_API_KEY) {
+  console.error('❌ GROQ_API_KEY não carregou');
+  process.exit(1);
+}
+
+// ================== SERVER CONFIG ==================
 const app = express();
-app.use(express.json()); // sempre antes das rotas
+const PORT = process.env.PORT || 3000;
+app.use(express.json());
+app.use(express.static(__dirname));
 
-// Conectar GROQ
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-// ------------- CONFIGS -------------
-const PORT = 3000;
-const MAX_HISTORY = 12; // número de mensagens (user+assistant) a manter na janela
-const MEMORY_FILE = path.join(__dirname, 'user_memory.json'); // para memória persistente simples
-// -----------------------------------
-
-// Carrega memória persistente (se houver)
+// ================== MEMORY & HISTORY ==================
 let userMemory = {};
+const userHistories = {};
+const MEMORY_FILE = path.join(__dirname, 'user_memory.json');
+
 try {
   if (fs.existsSync(MEMORY_FILE)) {
     userMemory = JSON.parse(fs.readFileSync(MEMORY_FILE, 'utf-8'));
   }
-} catch (e) {
-  console.error('Erro ao carregar memória:', e);
+} catch (err) {
+  console.error('Erro carregando memória:', err);
 }
 
-// Histórico em memória por usuário (não persistente)
-const userHistories = {}; // key: userId -> [{role:'user'|'assistant', content: '...'}, ...]
-
-// Prompt de sistema profissional
-const SYSTEM_PROMPT = `
-Você é LISA, uma assistente de vendas experiente, empática e direta.
-- Fale em português brasileiro.
-- Seja concisa, humana e persuasiva quando for vender.
-- Evite repetir perguntas que o usuário já respondeu.
-- Quando apropriado, faça oferta e direcione para fechamento.
-- Não invente preços; se não souber, peça permissão para checar.
-`;
-
-// Função utilitária para salvar memória em disco
-function saveUserMemoryToDisk() {
+function saveUserMemory() {
   try {
-    fs.writeFileSync(MEMORY_FILE, JSON.stringify(userMemory, null, 2), 'utf-8');
+    fs.writeFileSync(MEMORY_FILE, JSON.stringify(userMemory, null, 2));
   } catch (err) {
     console.error('Erro salvando memória:', err);
   }
 }
 
-// Pega o histórico do userId e garante janela limitada
 function pushToHistory(userId, role, content) {
   if (!userHistories[userId]) userHistories[userId] = [];
   userHistories[userId].push({ role, content });
-  // manter apenas as últimas MAX_HISTORY mensagens
-  if (userHistories[userId].length > MAX_HISTORY) {
-    userHistories[userId] = userHistories[userId].slice(-MAX_HISTORY);
+  if (userHistories[userId].length > 12) {
+    userHistories[userId] = userHistories[userId].slice(-12);
   }
 }
 
-// Pós-processamento simples da resposta (ex.: filtros, tom)
-function postProcessReply(raw) {
-  // exemplo: evitar respostas que começam com "Como posso ajudar"
-  let r = raw.trim();
-  // regras simples:
-  if (/^Estou aqui para/i.test(r)) {
-    r = r.replace(/^Estou aqui para[^\n]*/i, '').trim();
-  }
-  // garantir pontuação final
-  if (r && !/[.!?]$/.test(r)) r = r + '.';
-  return r;
-}
+// ================== GROQ CLIENT ==================
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY
+});
 
-// Endpoint teste (GET)
+// ================== ROUTES ==================
+
+// Front-end
 app.get('/', (req, res) => {
-  res.send('Chatbot Lisa com GROQ está funcionando!');
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-/*
-POST /chat
-Body:
-{
-  "userId": "id-do-cliente-ou-temp", // opcional mas recomendado para memória por usuário
-  "message": "texto"
-}
-*/
-app.post('/chat', async (req, res) => {
-  const { userId = 'anon', message } = req.body;
-
-  if (!message || typeof message !== 'string') {
-    return res.status(400).json({ error: 'Mensagem vazia ou inválida' });
-  }
-
-  // armazenar no histórico
-  pushToHistory(userId, 'user', message);
-
-  // montar lista de mensagens a enviar ao modelo: sistema + (opcional) memory + histórico
-  const memoryNote = userMemory[userId] ? `Memória do usuário: ${JSON.stringify(userMemory[userId])}` : null;
-
-  const messages = [
-    { role: 'system', content: SYSTEM_PROMPT },
-  ];
-
-  if (memoryNote) messages.push({ role: 'system', content: memoryNote });
-
-  // anexar histórico
-  const hist = userHistories[userId] || [];
-  for (const m of hist) {
-    // transformar roles para o formato esperado
-    messages.push({ role: m.role, content: m.content });
-  }
-
-  try {
-    const completion = await groq.chat.completions.create({
-      model: 'llama-3.1-8b-instant',
-      messages,
-      temperature: 0.85,
-      // se a API suportar top_p, penalties etc, pode passar aqui:
-      top_p: 0.95,
-    });
-
-    let reply = completion.choices[0].message.content || 'Desculpe, não entendi. Pode repetir?';
-    reply = postProcessReply(reply);
-
-    // armazena a resposta no histórico
-    pushToHistory(userId, 'assistant', reply);
-
-    // opcional: detectar facts para memória (muito simples: checar "meu nome é X" ou "me chamo X")
-    const nameMatch = message.match(/\b(meu nome é|me chamo|sou)\s+([A-ZÀ-Úa-zà-ú]+\b(?:\s+[A-ZÀ-Úa-zà-ú]+)?)?/i);
-    if (nameMatch) {
-      const name = (nameMatch[2] || '').trim();
-      if (name) {
-        userMemory[userId] = userMemory[userId] || {};
-        userMemory[userId].name = name;
-        saveUserMemoryToDisk();
-      }
-    }
-
-    return res.json({ reply });
-
-  } catch (error) {
-    console.error('ERRO GROQ:', error.response?.data || error);
-    return res.status(500).json({ error: 'Erro interno no servidor (GROQ)' });
-  }
-});
-
-// Rota para reiniciar histórico do usuário
+// Reset histórico
 app.post('/reset', (req, res) => {
   const { userId = 'anon' } = req.body;
   userHistories[userId] = [];
-  return res.json({ ok: true, message: `Histórico de ${userId} reiniciado.` });
+  res.json({ ok: true, message: `Histórico de ${userId} reiniciado.` });
 });
 
-// Rota para ver histórico (útil para debug)
+// ================== CHAT (TESTE CONTROLADO) ==================
+app.post('/chat', async (req, res) => {
+  const { userId = 'anon', message } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ error: 'Mensagem vazia.' });
+  }
+
+  try {
+    // 1️⃣ Salva mensagem do usuário no histórico
+    pushToHistory(userId, 'user', message);
+
+    // 2️⃣ Detecta nome do usuário
+    const nameMatch = message.match(
+      /\b(meu nome é|me chamo|sou)\s+([A-ZÀ-Úa-zà-ú]+(?:\s+[A-ZÀ-Úa-zà-ú]+)*)/i
+    );
+
+    if (nameMatch) {
+      userMemory[userId] = userMemory[userId] || {};
+      userMemory[userId].name = nameMatch[2];
+      saveUserMemory();
+    }
+
+    // 3️⃣ Detecta estado do usuário
+    const state = stateDetector(message);
+
+    // 4️⃣ Define estratégia
+    const strategy = strategyEngine(state);
+
+    // 5️⃣ Monta prompt do sistema (Lisa)
+    const systemPrompt = promptComposer({
+      userId,
+      memory: userMemory[userId] || {},
+      state,
+      strategy
+    });
+
+    // 6️⃣ Mensagens enviadas ao modelo
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      ...userHistories[userId]
+    ];
+
+    // 7️⃣ Chamada ao Groq
+    const completion = await groq.chat.completions.create({
+      model: 'llama3-70b-8192',
+      messages,
+      temperature: 0.7
+    });
+
+    // 8️⃣ Resposta da Lisa
+    const reply = completion.choices[0].message.content;
+
+    // 9️⃣ Salva resposta no histórico
+    pushToHistory(userId, 'assistant', reply);
+
+    // 🔟 Retorna resposta ao frontend
+    res.json({
+      ok: true,
+      reply
+    });
+
+  } catch (err) {
+    console.error('Erro processando chat:', err);
+    res.status(500).json({ error: 'Erro interno no servidor da Lisa' });
+  }
+});
+// ================== ADMIN ==================
+
+// Histórico
 app.get('/admin/history', (req, res) => {
-  const { userId = null } = req.query;
+  const { userId } = req.query;
   if (userId) return res.json({ userId, history: userHistories[userId] || [] });
-  return res.json({ all: userHistories });
+  res.json({ all: userHistories });
 });
 
-// Rota para ver e editar memória do usuário
+// Memória
 app.get('/admin/memory', (req, res) => {
-  const { userId = null } = req.query;
+  const { userId } = req.query;
   if (userId) return res.json({ userId, memory: userMemory[userId] || {} });
-  return res.json({ all: userMemory });
+  res.json({ all: userMemory });
 });
+
+// Atualizar memória manualmente
 app.post('/admin/memory', (req, res) => {
   const { userId, memory } = req.body;
-  if (!userId || !memory) return res.status(400).json({ error: 'userId e memory necessários' });
+  if (!userId || !memory) {
+    return res.status(400).json({ error: 'userId e memory necessários' });
+  }
   userMemory[userId] = memory;
-  saveUserMemoryToDisk();
-  return res.json({ ok: true });
+  saveUserMemory();
+  res.json({ ok: true });
 });
 
-// Feedback manual (RLHF básico): marcar se resposta foi boa/ruim e salvar o par
+// Feedback
 app.post('/feedback', (req, res) => {
   const { userId = 'anon', userMessage, assistantReply, good = true } = req.body;
   const log = { ts: new Date().toISOString(), userId, userMessage, assistantReply, good };
+
   try {
-    fs.appendFileSync(path.join(__dirname, 'feedback.log'), JSON.stringify(log) + '\n');
-    return res.json({ ok: true });
+    fs.appendFileSync(
+      path.join(__dirname, 'feedback.log'),
+      JSON.stringify(log) + '\n'
+    );
+    res.json({ ok: true });
   } catch (err) {
-    return res.status(500).json({ error: 'Não foi possível salvar feedback' });
+    res.status(500).json({ error: 'Não foi possível salvar feedback' });
   }
 });
 
-// iniciar servidor
+// ================== START SERVER ==================
 app.listen(PORT, () => {
-  console.log(`Chatbot Lisa rodando com GROQ em http://localhost:${PORT}`);
+  console.log(`🚀 Chatbot Lisa rodando em http://localhost:${PORT}`);
 });
