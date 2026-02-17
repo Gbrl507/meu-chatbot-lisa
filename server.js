@@ -30,7 +30,9 @@ if (!process.env.GROQ_API_KEY) {
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(express.json());
-app.use(express.static(__dirname));
+
+// Servir apenas a pasta 'public' como front-end
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ================== MEMORY & HISTORY ==================
 let userMemory = {};
@@ -70,7 +72,7 @@ const groq = new Groq({
 
 // Front-end
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Reset histórico
@@ -80,7 +82,7 @@ app.post('/reset', (req, res) => {
   res.json({ ok: true, message: `Histórico de ${userId} reiniciado.` });
 });
 
-// ================== CHAT (TESTE CONTROLADO) ==================
+// ================== CHAT ==================
 app.post('/chat', async (req, res) => {
   const { userId = 'anon', message } = req.body;
 
@@ -89,10 +91,8 @@ app.post('/chat', async (req, res) => {
   }
 
   try {
-    // 1️⃣ Salva mensagem do usuário no histórico
     pushToHistory(userId, 'user', message);
 
-    // 2️⃣ Detecta nome do usuário
     const nameMatch = message.match(
       /\b(meu nome é|me chamo|sou)\s+([A-ZÀ-Úa-zà-ú]+(?:\s+[A-ZÀ-Úa-zà-ú]+)*)/i
     );
@@ -103,13 +103,8 @@ app.post('/chat', async (req, res) => {
       saveUserMemory();
     }
 
-    // 3️⃣ Detecta estado do usuário
     const state = stateDetector(message);
-
-    // 4️⃣ Define estratégia
     const strategy = strategyEngine(state);
-
-    // 5️⃣ Monta prompt do sistema (Lisa)
     const systemPrompt = promptComposer({
       userId,
       memory: userMemory[userId] || {},
@@ -117,53 +112,41 @@ app.post('/chat', async (req, res) => {
       strategy
     });
 
-    // 6️⃣ Mensagens enviadas ao modelo
     const messages = [
       { role: 'system', content: systemPrompt },
       ...userHistories[userId]
     ];
 
-    // 7️⃣ Chamada ao Groq
     const completion = await groq.chat.completions.create({
       model: 'llama3-70b-8192',
       messages,
       temperature: 0.7
     });
 
-    // 8️⃣ Resposta da Lisa
     const reply = completion.choices[0].message.content;
-
-    // 9️⃣ Salva resposta no histórico
     pushToHistory(userId, 'assistant', reply);
 
-    // 🔟 Retorna resposta ao frontend
-    res.json({
-      ok: true,
-      reply
-    });
+    res.json({ ok: true, reply });
 
   } catch (err) {
     console.error('Erro processando chat:', err);
     res.status(500).json({ error: 'Erro interno no servidor da Lisa' });
   }
 });
-// ================== ADMIN ==================
 
-// Histórico
+// ================== ADMIN ==================
 app.get('/admin/history', (req, res) => {
   const { userId } = req.query;
   if (userId) return res.json({ userId, history: userHistories[userId] || [] });
   res.json({ all: userHistories });
 });
 
-// Memória
 app.get('/admin/memory', (req, res) => {
   const { userId } = req.query;
   if (userId) return res.json({ userId, memory: userMemory[userId] || {} });
   res.json({ all: userMemory });
 });
 
-// Atualizar memória manualmente
 app.post('/admin/memory', (req, res) => {
   const { userId, memory } = req.body;
   if (!userId || !memory) {
@@ -174,7 +157,6 @@ app.post('/admin/memory', (req, res) => {
   res.json({ ok: true });
 });
 
-// Feedback
 app.post('/feedback', (req, res) => {
   const { userId = 'anon', userMessage, assistantReply, good = true } = req.body;
   const log = { ts: new Date().toISOString(), userId, userMessage, assistantReply, good };
@@ -192,5 +174,5 @@ app.post('/feedback', (req, res) => {
 
 // ================== START SERVER ==================
 app.listen(PORT, () => {
-  console.log(`🚀 Chatbot Lisa rodando em http://localhost:${PORT}`);
+  console.log(`🚀 Chatbot Lisa rodando na porta ${PORT}`);
 });

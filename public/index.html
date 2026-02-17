@@ -9,6 +9,7 @@
     #chat div { margin-bottom: 10px; }
     .user { text-align: right; color: blue; }
     .lisa { text-align: left; color: green; }
+    #typing { font-style: italic; color: gray; margin-bottom: 10px; }
     #inputArea { display: flex; padding: 10px; background: #ddd; }
     #message { flex: 1; padding: 10px; font-size: 16px; }
     #send { padding: 10px 20px; font-size: 16px; }
@@ -26,27 +27,54 @@
     const messageInput = document.getElementById('message');
     const sendBtn = document.getElementById('send');
 
+    const userId = localStorage.getItem('userId') || ('user_' + Math.floor(Math.random() * 100000));
+    localStorage.setItem('userId', userId);
+
+    // Carrega histórico do localStorage
+    const chatHistory = JSON.parse(localStorage.getItem('chatHistory_' + userId) || '[]');
+    chatHistory.forEach(msg => addMessage(msg.text, msg.cls));
+
     function addMessage(text, cls) {
       const div = document.createElement('div');
       div.className = cls;
       div.textContent = text;
       chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
+      chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+
+      // Salva no histórico local
+      chatHistory.push({ text, cls });
+      localStorage.setItem('chatHistory_' + userId, JSON.stringify(chatHistory));
     }
 
     async function sendMessage() {
       const message = messageInput.value.trim();
       if (!message) return;
+
       addMessage(message, 'user');
       messageInput.value = '';
-      
-      const res = await fetch('/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message })
-      });
-      const data = await res.json();
-      addMessage(data.reply || 'Sem resposta', 'lisa');
+
+      // Mostrar “Lisa está digitando...”
+      const typingDiv = document.createElement('div');
+      typingDiv.id = 'typing';
+      typingDiv.textContent = 'Lisa está digitando...';
+      chat.appendChild(typingDiv);
+      chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+
+      try {
+        const res = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, message })
+        });
+        const data = await res.json();
+
+        typingDiv.remove(); // remove o "digitando"
+        addMessage(data.reply || 'Sem resposta', 'lisa');
+      } catch (err) {
+        typingDiv.remove();
+        addMessage('Erro ao conectar com a Lisa', 'lisa');
+        console.error(err);
+      }
     }
 
     sendBtn.addEventListener('click', sendMessage);
