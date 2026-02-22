@@ -1,0 +1,20 @@
+{
+  "cliente_teste_01": {
+    "detectedProfile": "ANALYTIC",
+    "currentAwareness": "NEUTRAL"
+  },
+  "teste_01": {
+    "detectedProfile": "AFFABLE",
+    "currentAwareness": "PROBLEM_AWARE",
+    "lastObjection": "Meu faturamento caiu 30% este mês e não sei o que fazer. Meu negócio é uma agência de marketing e meus clientes dizem que está caro. Me ajuda?",
+    "resistanceCount": 4
+  },
+  "cliente-teste-01": {
+    "detectedProfile": "ANALYTIC",
+    "currentAwareness": "NEUTRAL"
+  },
+  "user_1771797943928_u3apk4": {
+    "detectedProfile": "AFFABLE",
+    "currentAwareness": "NEUTRAL"
+  }
+}

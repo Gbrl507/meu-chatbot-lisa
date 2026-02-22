@@ -1,0 +1,30 @@
+{
+  "cliente-teste-01": [
+    {
+      "role": "user",
+      "content": "Ol�! Vi o site de voc�s. Quais tratamentos voc�s oferecem para o rosto?"
+    },
+    {
+      "role": "assistant",
+      "content": "Olá! É um prazer conversar com você! Nossa clínica oferece uma variedade de tratamentos para o rosto, desde procedimentos não invasivos até mais avançados, dependendo das necessidades e objetivos de cada paciente.\n\nMas antes de entrar nos detalhes dos tratamentos, posso perguntar: o que você está procurando em um tratamento facial? Você está buscando melhorar a aparência da pele, reduzir rugas, ou talvez melhorar a definição dos contornos do rosto? É importante entender o que você deseja alcançar para que possamos oferecer a melhor opção para você.\n\nE, se não se importar, posso perguntar: o que você acha que é o maior desafio que você enfrenta atualmente com a aparência do seu rosto? Isso me ajudará a entender melhor suas necessidades e a oferecer uma solução mais personalizada."
+    },
+    {
+      "role": "user",
+      "content": "O tratamento d�i? E como fa�o para agendar uma avalia��o?"
+    },
+    {
+      "role": "assistant",
+      "content": "Excelente pergunta! Nossa equipe de especialistas trabalha com tecnologias de ponta e técnicas avançadas para garantir que os tratamentos sejam eficazes e seguros. A duração do tratamento pode variar dependendo do procedimento escolhido e das necessidades individuais de cada paciente.\n\nNo entanto, posso dizer que muitos de nossos tratamentos são rápidos e podem ser realizados em uma única sessão, com resultados visíveis logo após a aplicação. Além disso, oferecemos opções de tratamento personalizadas para atender às necessidades específicas de cada paciente, garantindo que você obtenha os melhores resultados possíveis.\n\nAgora, sobre como agendar uma avaliação... é muito simples! Você pode entrar em contato conosco através do nosso site, enviando uma mensagem ou fazendo uma ligação para nosso número de telefone. Também podemos agendar uma avaliação por vídeoconferência, se você preferir.\n\nMas, antes de agendar a avaliação, posso perguntar: você já teve alguma experiência com tratamentos faciais no passado? E o que você acha que é o maior benefício que você está procurando obter com o tratamento? Isso me ajudará a entender melhor suas expectativas e a garantir que nossa equipe esteja preparada para atender às suas necessidades.\n\nE, como um próximo passo, posso oferecer a você uma consulta gratuita com um de nossos especialistas? Isso lhe dará a oportunidade de discutir suas necessidades e objetivos em mais detalhes e obter uma avaliação personalizada. O que você acha?"
+    }
+  ],
+  "user_1771797943928_u3apk4": [
+    {
+      "role": "user",
+      "content": "oi"
+    },
+    {
+      "role": "assistant",
+      "content": "Olá! É um prazer conversar com você, Prospecto! Eu entendo que você é alguém que valoriza relacionamentos e o bem-estar da equipe, e isso é incrível. Quero começar nossa conversa de uma forma que seja confortável e interessante para você.\n\nEu gostaria de compartilhar uma pergunta que pode parecer um pouco desafiadora, mas é importante para entender melhor como podemos trabalhar juntos. Você já se perguntou como seria se sua equipe pudesse alcançar resultados ainda mais incríveis, mantendo o equilíbrio e a harmonia que você valoriza tanto?\n\nEssa pergunta é apenas um ponto de partida para nossa conversa. O que você acha? Você está disposto a explorar um pouco mais essa ideia juntos?"
+    }
+  ]
+}

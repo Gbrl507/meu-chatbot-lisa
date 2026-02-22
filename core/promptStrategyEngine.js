@@ -1,48 +1,15 @@
 // core/promptStrategyEngine.js
 
-function applyPromptStrategy(basePrompt, strategy) {
-  let instruction = '';
-
-  switch (strategy) {
-    case 'AQUECER':
-      instruction = `
-Foque em empatia e conforto.
-Faça perguntas abertas.
-Não pressione.
-`;
-      break;
-
-    case 'EXPLORAR':
-      instruction = `
-Ajude o usuário a clarear necessidades.
-Faça perguntas objetivas.
-`;
-      break;
-
-    case 'AVANCAR':
-      instruction = `
-Mostre benefícios claros.
-Direcione para o próximo passo.
-`;
-      break;
-
-    case 'FECHAR':
-      instruction = `
-Seja direto.
-Remova objeções.
-Conduza para decisão agora.
-`;
-      break;
-  }
-
-  return `
-${basePrompt}
-
---- Diretriz de Comunicação ---
-${instruction}
-`;
+/**
+ * 🎯 Prompt Strategy Engine (Suporte)
+ * Mantemos para compatibilidade, mas a inteligência agora 
+ * está centralizada no strategyEngine.js
+ */
+function promptStrategyEngine(data) {
+  return {
+    status: "integrated",
+    mode: data.state?.profile || "NEUTRAL"
+  };
 }
 
-module.exports = {
-  applyPromptStrategy
-};
+module.exports = promptStrategyEngine;

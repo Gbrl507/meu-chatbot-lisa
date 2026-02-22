@@ -1,32 +1,31 @@
-// 🤫 Silêncio Estratégico da Lisa
-// Pausas calculadas para gerar valor
+// core/silence.js
 
-function calculateSilence(state) {
-  switch (state) {
-    case "CURIOSIDADE":
-      return random(1200, 2500);
+function silence(profile, awareness) {
+  // Se o server passar um objeto em vez de strings, a gente trata
+  const p = typeof profile === 'string' ? profile : (profile?.profile || 'PRAGMATIC');
+  const a = typeof awareness === 'string' ? awareness : (profile?.awareness || 'NEUTRAL');
 
-    case "INTERESSE_PRECO":
-      return random(2000, 4000);
+  const profileWeights = {
+    PRAGMATIC: 500,
+    ANALYTIC: 3000,
+    EXPRESSIVE: 1500,
+    AFFABLE: 2000
+  };
 
-    case "INDECISAO":
-      return random(3000, 5000);
+  const awarenessWeights = {
+    PROBLEM_AWARE: 1500, 
+    SOLUTION_AWARE: 2000,
+    DECISION_READY: 500,
+    NEUTRAL: 1000
+  };
 
-    case "RESISTENCIA":
-      return random(3500, 6000);
+  const baseDelay = (profileWeights[p] || 1000) + (awarenessWeights[a] || 1000);
+  const finalDelay = baseDelay + Math.floor(Math.random() * 1000);
 
-    case "INTENCAO_COMPRA":
-      return random(300, 900);
-
-    default:
-      return random(800, 1800);
-  }
+  console.log(`[SILENCE] Perfil: ${p} | Delay: ${finalDelay}ms`);
+  
+  return finalDelay;
 }
 
-function random(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-module.exports = {
-  calculateSilence
-};
+// Isso faz com que 'silence' possa ser chamado como função direta
+module.exports = silence;

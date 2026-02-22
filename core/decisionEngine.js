@@ -1,33 +1,16 @@
 // core/decisionEngine.js
 
-function decide(score) {
-  if (score <= 0) {
-    return {
-      state: 'FRIO',
-      strategy: 'AQUECER'
-    };
-  }
-
-  if (score <= 2) {
-    return {
-      state: 'CURIOSO',
-      strategy: 'EXPLORAR'
-    };
-  }
-
-  if (score <= 4) {
-    return {
-      state: 'QUENTE',
-      strategy: 'AVANCAR'
-    };
-  }
-
+/**
+ * 🧠 Decision Engine (Repassador)
+ * Mantemos este arquivo para não quebrar o server.js, 
+ * mas a lógica real agora vive no strategyEngine.
+ */
+function decisionEngine(data) {
+  // Apenas retorna um objeto básico para o server.js não "reclamar"
   return {
-    state: 'DECIDIDO',
-    strategy: 'FECHAR'
+    status: "active",
+    processed: true
   };
 }
 
-module.exports = {
-  decide
-};
+module.exports = decisionEngine;

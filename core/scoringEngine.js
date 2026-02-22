@@ -1,67 +1,26 @@
 // core/scoringEngine.js
 
-const decisions = {};
-
 /**
- * Registra uma decisão tomada pela IA
+ * 📈 Motor de Pontuação de Vendas (Scoring)
+ * Calcula de 0 a 100 a probabilidade de fechamento baseada no comportamento.
  */
-function registerDecision({ userId, strategy }) {
-  const decisionId = `${userId}_${Date.now()}`;
+function scoringEngine({ message, state, memory, history }) {
+  let score = 50; // Começamos no meio (neutro)
+  const text = message.toLowerCase();
 
-  decisions[decisionId] = {
-    decisionId,
-    userId,
-    strategy,
-    score: 50, // começa neutro
-    signals: [],
-    createdAt: Date.now(),
-    finalized: false
-  };
+  // 1. Sinais Positivos (Aumentam o score)
+  if (state === 'DECISION_READY') score += 30;
+  if (state === 'SOLUTION_AWARE') score += 15;
+  if (/\b(comprar|fechar|pagamento|cartão|pix|contrato|assinar)\b/i.test(text)) score += 20;
+  if (memory && memory.name) score += 5; // Cliente que dá o nome está mais engajado
 
-  return decisionId;
+  // 2. Sinais Negativos (Diminuem o score)
+  if (/\b(caro|depois|pensar|amanhã|chefe|sócio|dúvida)\b/i.test(text)) score -= 20;
+  if (history && history.length > 15) score -= 10; // Conversas longas demais sem fechamento tendem a esfriar
+
+  // 3. Trava de Segurança (Clamp entre 0 e 100)
+  return Math.min(Math.max(score, 0), 100);
 }
 
-/**
- * Aplica um sinal ao score
- */
-function applySignal(decisionId, value, reason) {
-  const d = decisions[decisionId];
-  if (!d || d.finalized) return;
-
-  d.score += value;
-  d.signals.push({
-    value,
-    reason,
-    at: Date.now()
-  });
-
-  // clamp simples
-  if (d.score < 0) d.score = 0;
-  if (d.score > 100) d.score = 100;
-}
-
-/**
- * Finaliza a decisão
- */
-function finalizeDecision(decisionId) {
-  const d = decisions[decisionId];
-  if (!d) return null;
-
-  d.finalized = true;
-  d.finishedAt = Date.now();
-  return d;
-}
-
-/**
- * Obtém decisão
- */
-function getDecision(decisionId) {
-  return decisions[decisionId] || null;
-}
-
-module.exports = {
-  registerDecision,
-  applySignal,
-  finalizeDecision,
-  getDecision
-};
+// Exportação correta para o server.js
+module.exports = scoringEngine;
