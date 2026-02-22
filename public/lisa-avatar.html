@@ -2,7 +2,11 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#00FFCC">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Lisa — Clínica Estética Prime</title>
 <style>
 /* ===== TEMAS — mudar data-theme no body atualiza TUDO via CSS vars ===== */
@@ -300,9 +304,264 @@ textarea.inp:focus{border-color:var(--bc);box-shadow:0 0 0 3px var(--gs)}
 }
 .back-pill:hover{color:var(--c1)}
 #pc{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.4}
+
+/* ═══════════════════════════════════════════════════════════════
+   ANDROID / IOS — QUALIDADE PREMIUM 4K
+   Otimizado para telas de alta densidade (AMOLED, Retina, etc)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Renderização nítida em telas de alta densidade */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Previne zoom indesejado no iOS ao focar input */
+textarea.inp { font-size: 16px !important; }
+
+/* Scroll suave nativo no iOS */
+.msgs { -webkit-overflow-scrolling: touch; }
+.quick { -webkit-overflow-scrolling: touch; }
+
+/* Remove highlight azul ao tocar no Android */
+* { -webkit-tap-highlight-color: transparent; }
+
+/* Botões com área de toque maior (recomendação Google: 48px mínimo) */
+.send, .mic, .nb, .qp, .nav-pill, .back-pill {
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+
+  /* ── BODY ── */
+  body { overflow: hidden; height: 100dvh; }
+
+  /* ── SHELL ── */
+  .shell {
+    grid-template-rows: 52px 1fr !important;
+    height: 100dvh !important;
+  }
+
+  /* ── NAV compacta ── */
+  nav {
+    padding: 0 14px !important;
+    gap: 8px !important;
+    height: 52px !important;
+  }
+  .logo { font-size: 15px !important; gap: 6px !important; }
+  .logo-ring { width: 24px !important; height: 24px !important; font-size: 10px !important; }
+  .nb { padding: 5px 11px !important; font-size: 11px !important; }
+  .niches { padding: 3px !important; gap: 3px !important; }
+  .nav-status { display: none !important; }
+  .nav-pill { padding: 5px 11px !important; font-size: 10px !important; gap: 4px !important; }
+
+  /* ── MAIN: coluna ── */
+  .main {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 240px 1fr !important;
+    height: calc(100dvh - 52px) !important;
+    overflow: hidden !important;
+  }
+
+  /* ── STAGE do avatar ── */
+  .stage {
+    padding: 10px 16px !important;
+    min-height: 240px !important;
+    max-height: 240px !important;
+    overflow: hidden !important;
+  }
+
+  /* Anéis responsivos */
+  .aring:nth-child(1){width:230px!important;height:230px!important}
+  .aring:nth-child(2){width:195px!important;height:195px!important}
+  .aring:nth-child(3){width:165px!important;height:165px!important}
+  .aring:nth-child(4){width:138px!important;height:138px!important}
+  .aring:nth-child(5){width:114px!important;height:114px!important}
+  .aring:nth-child(6){width:92px!important;height:92px!important}
+  .stage-glow { width:180px!important; height:180px!important; }
+
+  /* Avatar wrap horizontal */
+  .av-wrap {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 18px !important;
+  }
+
+  /* Avatar circle menor */
+  .av-face  { width: 120px !important; height: 120px !important; }
+  .av-circle{ width: 120px !important; height: 120px !important; }
+  .av-aura  { inset: -9px !important; }
+  .speak-ring{ inset: -5px !important; }
+  .face-svg { width: 78px !important; height: 78px !important; }
+
+  /* Info col ao lado */
+  .av-info-col {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 5px !important;
+  }
+
+  .av-name {
+    font-size: 20px !important;
+    letter-spacing: 3px !important;
+    text-shadow: 0 0 14px var(--glow) !important;
+  }
+  .av-role {
+    font-size: 9px !important;
+    text-align: left !important;
+    letter-spacing: 1.5px !important;
+  }
+
+  /* Ondas compactas */
+  .waves { height: 22px !important; gap: 2.5px !important; }
+  .wb { width: 2.5px !important; }
+
+  /* Stats compactos */
+  .av-stats { gap: 6px !important; margin-top: 2px !important; }
+  .av-stat {
+    padding: 5px 10px !important;
+    min-width: 60px !important;
+    border-radius: 8px !important;
+  }
+  .av-stat-v { font-size: 14px !important; }
+  .av-stat-l { font-size: 8px !important; letter-spacing: 0.5px !important; }
+
+  /* ── CHAT ── */
+  .chat {
+    border-left: none !important;
+    border-top: 1px solid var(--bc) !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .chat-head { padding: 10px 16px 8px !important; }
+  .chat-title { font-size: 13px !important; }
+  .chat-sub { font-size: 10px !important; }
+
+  /* Quick prompts scroll horizontal sem scrollbar */
+  .quick {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    padding: 8px 16px !important;
+    gap: 6px !important;
+    scrollbar-width: none !important;
+  }
+  .quick::-webkit-scrollbar { display: none !important; }
+  .qp {
+    font-size: 11px !important;
+    padding: 6px 13px !important;
+    white-space: nowrap !important;
+    border-radius: 50px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Mensagens */
+  .msgs { padding: 12px 16px !important; gap: 12px !important; }
+  .bubble {
+    font-size: 13.5px !important;
+    line-height: 1.6 !important;
+    padding: 10px 14px !important;
+    border-radius: 16px !important;
+  }
+  .msg-ico {
+    width: 28px !important; height: 28px !important;
+    font-size: 11px !important; flex-shrink: 0 !important;
+  }
+  .msg-t { font-size: 10px !important; }
+
+  /* Input area */
+  .inp-area {
+    padding: 10px 16px 16px !important;
+    padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+  }
+  .inp-row { gap: 8px !important; }
+  textarea.inp {
+    border-radius: 14px !important;
+    padding: 11px 14px !important;
+    line-height: 1.5 !important;
+  }
+  .send {
+    width: 44px !important; height: 44px !important;
+    border-radius: 12px !important; font-size: 16px !important;
+    flex-shrink: 0 !important;
+  }
+  .mic {
+    width: 44px !important; height: 44px !important;
+    border-radius: 12px !important; font-size: 16px !important;
+    flex-shrink: 0 !important;
+  }
+  .inp-hint { font-size: 10px !important; margin-top: 6px !important; }
+
+  /* Back pill */
+  .back-pill {
+    bottom: max(16px, env(safe-area-inset-bottom)) !important;
+    left: 16px !important;
+    padding: 8px 14px !important;
+    font-size: 11px !important;
+  }
+}
+
+/* ── Telas muito pequenas (< 380px — Galaxy A series, etc) ── */
+@media (max-width: 380px) {
+  .main { grid-template-rows: 210px 1fr !important; }
+  .stage { min-height: 210px !important; max-height: 210px !important; }
+  .av-face  { width: 100px !important; height: 100px !important; }
+  .av-circle{ width: 100px !important; height: 100px !important; }
+  .face-svg { width: 65px !important; height: 65px !important; }
+  .av-name  { font-size: 17px !important; }
+  .av-stats { display: none !important; }
+  .aring:nth-child(1){width:200px!important;height:200px!important}
+  .aring:nth-child(2){width:168px!important;height:168px!important}
+  .aring:nth-child(3){width:140px!important;height:140px!important}
+  .aring:nth-child(4){width:115px!important;height:115px!important}
+  .aring:nth-child(5){width:93px!important;height:93px!important}
+  .aring:nth-child(6){width:74px!important;height:74px!important}
+}
+
+/* ── iPad / Tablet (768px - 1024px) ── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .main { grid-template-columns: 1fr 340px !important; }
+  .av-name { font-size: 22px !important; }
+  .av-face  { width: 160px !important; height: 160px !important; }
+  .av-circle{ width: 160px !important; height: 160px !important; }
+  .face-svg { width: 104px !important; height: 104px !important; }
+}
+
 </style>
 </head>
 <body id="root">
+<script>
+// PWA: permite adicionar na tela inicial do Android
+if ('serviceWorker' in navigator) {
+  // Registra service worker básico para PWA
+  window.addEventListener('load', () => {
+    // Cria manifest dinamicamente
+    const manifest = {
+      name: 'Lisa AI — Estética Prime',
+      short_name: 'Lisa AI',
+      description: 'Consultora de Estética com IA',
+      start_url: '/lisa-avatar.html',
+      display: 'standalone',
+      background_color: '#05080f',
+      theme_color: '#00FFCC',
+      orientation: 'portrait',
+      icons: [{
+        src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2300FFCC'/><text y='.9em' font-size='60' x='50%' text-anchor='middle' fill='black'>✦</text></svg>",
+        sizes: '512x512', type: 'image/svg+xml'
+      }]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('link');
+    link.rel = 'manifest'; link.href = url;
+    document.head.appendChild(link);
+  });
+}
+</script>
 <canvas id="pc"></canvas>
 <div class="bg"></div>
 
@@ -346,7 +605,7 @@ textarea.inp:focus{border-color:var(--bc);box-shadow:0 0 0 3px var(--gs)}
               ║  O SVG atualiza automaticamente quando o tema muda    ║
               ╚═══════════════════════════════════════════════════════╝
             -->
-            <svg class="face-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg class="face-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
               <defs>
                 <!-- Gradiente de brilho do rosto — usa var(--c1) -->
                 <radialGradient id="fg" cx="50%" cy="40%" r="60%">
@@ -464,6 +723,7 @@ textarea.inp:focus{border-color:var(--bc);box-shadow:0 0 0 3px var(--gs)}
           <div class="wb"></div><div class="wb"></div><div class="wb"></div>
         </div>
 
+        <div class="av-info-col">
         <div class="av-name">LISA</div>
         <div class="av-role">Consultora de Estética Prime</div>
         <div class="av-stats">
@@ -471,6 +731,7 @@ textarea.inp:focus{border-color:var(--bc);box-shadow:0 0 0 3px var(--gs)}
           <div class="av-stat"><div class="av-stat-v" id="stat-r">1.2s</div><div class="av-stat-l">Resposta</div></div>
           <div class="av-stat"><div class="av-stat-v" id="stat-l">847</div><div class="av-stat-l">Leads</div></div>
         </div>
+        </div><!-- fim av-info-col -->
       </div>
     </div>
 
@@ -670,7 +931,7 @@ const API_CONFIG = {
   // Se o avatar está na mesma máquina que o server.js, use window.location.origin
   // Se estiver em domínio diferente, coloque a URL completa:
   // Ex: 'https://meu-servidor.com' ou 'http://123.456.789.0:3000'
- baseUrl: 'https://meu-chatbot-lisa.onrender.com',
+  baseUrl: 'http://localhost:3000',
 
   // 🏷️ Slugs dos tenants cadastrados via POST /admin/setup-tenant
   // Estes valores devem ser EXATAMENTE iguais ao campo "slug" no MongoDB
@@ -795,7 +1056,13 @@ setInterval(()=>{ const e=document.getElementById('stat-r'); if(e) e.textContent
 (function(){
   const cv=document.getElementById('pc'), ctx=cv.getContext('2d');
   let W,H;
-  const rz=()=>{ W=cv.width=innerWidth; H=cv.height=innerHeight; };
+  const dpr = window.devicePixelRatio || 1;
+  const rz=()=>{
+    W=innerWidth; H=innerHeight;
+    cv.width=W*dpr; cv.height=H*dpr;
+    cv.style.width=W+'px'; cv.style.height=H+'px';
+    ctx.scale(dpr,dpr);
+  };
   rz(); addEventListener('resize',rz);
   const pts=Array.from({length:50},()=>({
     x:Math.random()*1920,y:Math.random()*1080,
@@ -819,9 +1086,18 @@ setInterval(()=>{ const e=document.getElementById('stat-r'); if(e) e.textContent
       if(p.x<0)p.x=W; if(p.x>W)p.x=0;
       if(p.y<0)p.y=H; if(p.y>H)p.y=0;
       const al=p.a*(.55+.45*Math.sin(p.p));
+      // Glow suave ao redor da partícula (qualidade 4K)
+      const grd=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*3);
+      grd.addColorStop(0,`rgba(${r},${g},${b},${al})`);
+      grd.addColorStop(1,`rgba(${r},${g},${b},0)`);
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r*3,0,Math.PI*2);
+      ctx.fillStyle=grd;
+      ctx.fill();
+      // Núcleo brilhante
       ctx.beginPath();
       ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(${r},${g},${b},${al})`;
+      ctx.fillStyle=`rgba(${r},${g},${b},${Math.min(al*2,1)})`;
       ctx.fill();
     });
     requestAnimationFrame(draw);
