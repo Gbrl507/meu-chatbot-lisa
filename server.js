@@ -1,4 +1,5 @@
 // ================== 1. CONFIGURAÇÃO E IMPORTS ==================
+const cors = require('cors');
 require('dotenv').config(); 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -32,6 +33,8 @@ mongoose.connect(process.env.MONGO_URI)
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(express.json());
+const cors = require('cors');
+app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
