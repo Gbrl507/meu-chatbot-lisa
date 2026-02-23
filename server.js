@@ -26,7 +26,8 @@ if (!process.env.GROQ_API_KEY) {
     process.exit(1);
 }
 
-mongoose.connect(process.env.MONGO_URI || 'mongodb+srv://luisgabriel5073234_db_user:AecOennqe8JgBVVz@cluster0.1ya69kg.mongodb.net/lisa_db?retryWrites=true&w=majority')
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://luisgabriel5073234_db_user:AecOennqe8JgBVVz@cluster0.1ya69kg.mongodb.net/lisa_db?retryWrites=true&w=majority';
+mongoose.connect(MONGO_URI)
   .then(() => console.log("✅ Banco de Dados Multi-Tenant Conectado!"))
   .catch(err => console.error("❌ Erro no MongoDB:", err));
 
