@@ -210,6 +210,7 @@ nav{
   color:var(--c1);text-shadow:0 0 18px var(--glow);
 }
 .av-role{font-size:11px;color:rgba(255,255,255,.33);letter-spacing:2.5px;text-transform:uppercase;text-align:center}
+.av-info-col{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;}
 
 .av-stats{display:flex;gap:10px;margin-top:2px}
 .av-stat{
@@ -401,7 +402,8 @@ textarea.inp { font-size: 16px !important; }
   .av-info-col {
     display: flex !important;
     flex-direction: column !important;
-    align-items: flex-start !important;
+    align-items: center !important;
+    justify-content: center !important;
     gap: 5px !important;
   }
 
@@ -412,7 +414,7 @@ textarea.inp { font-size: 16px !important; }
   }
   .av-role {
     font-size: 9px !important;
-    text-align: left !important;
+    text-align: center !important;
     letter-spacing: 1.5px !important;
   }
 
@@ -931,7 +933,7 @@ const API_CONFIG = {
   // Se o avatar está na mesma máquina que o server.js, use window.location.origin
   // Se estiver em domínio diferente, coloque a URL completa:
   // Ex: 'https://meu-servidor.com' ou 'http://123.456.789.0:3000'
-  baseUrl: 'http://localhost:3000',
+  baseUrl: 'https://meu-chatbot-lisa.onrender.com',
 
   // 🏷️ Slugs dos tenants cadastrados via POST /admin/setup-tenant
   // Estes valores devem ser EXATAMENTE iguais ao campo "slug" no MongoDB
