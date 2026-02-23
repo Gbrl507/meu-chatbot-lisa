@@ -34,7 +34,6 @@ mongoose.connect(MONGO_URI)
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(express.json());
-const cors = require('cors');
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
