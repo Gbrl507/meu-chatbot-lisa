@@ -830,7 +830,7 @@ const T = {
   }
 };
 
-let cur = 'tech', speaking = false;
+let cur = 'tech', speaking = false, greeted = false;
 
 function setTheme(key, btn) {
   if (cur === key) return;
@@ -858,7 +858,7 @@ function setTheme(key, btn) {
     .join('');
 
   // Mensagem de boas-vindas
-  appendMsg(t.greet.replace(/\*\*(.*?)\*\*/g,'$1'), 'lisa');
+  
 }
 
 // Init botão luxo
@@ -942,10 +942,10 @@ const API_CONFIG = {
   // 👤 ID do usuário — gerado uma vez por sessão
   // O servidor usa este ID para memória, histórico e scoring
   userId: (function() {
-    let id = sessionStorage.getItem('lisa_user_id');
+    let id = localStorage.getItem('lisa_user_id');
     if (!id) {
       id = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
-      sessionStorage.setItem('lisa_user_id', id);
+   localStorage.setItem('lisa_user_id', id);
     }
     return id;
   })(),
@@ -988,32 +988,22 @@ async function send() {
   const txt = el.value.trim();
   if (!txt || speaking) return;
 
-  // Mostra mensagem do usuário
   appendMsg(txt, 'user');
   el.value = ''; el.style.height = '';
 
-  // Indicador de digitação
   showTyping();
 
   try {
-    // Chama sua IA real
     const reply = await callLisaAPI(txt);
     rmTyping();
+    greeted = true;
     appendMsg(reply, 'lisa');
-
   } catch (err) {
     rmTyping();
-    console.error('Erro ao chamar IA:', err);
-
-    // Mensagem de erro amigável na interface
-    appendMsg(
-      '⚠️ Não consegui conectar com o servidor. Verifique se o Node.js está rodando e o slug "' +
-      getSlug() + '" está cadastrado no MongoDB.',
-      'lisa'
-    );
+    console.error('Erro:', err);
+    appendMsg('⚠️ Não consegui conectar. Tente novamente.', 'lisa');
   }
 }
-
 function sq(t){ document.getElementById('inp').value=t; send(); }
 function hk(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); send(); } }
 function ah(el){ el.style.height=''; el.style.height=Math.min(el.scrollHeight,110)+'px'; }
