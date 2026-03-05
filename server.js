@@ -17,7 +17,7 @@ const Tenant = require('./models/Tenant');
 
 console.log('TIPO DO SCRAPER:', typeof scrapeWebsite);
 
-const GROQ_KEY = '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';
+const GROQ_KEY = process.env.GROQ_API_KEY;
 const DB = 'mongodb+srv://luisgabriel5073234_db_user:AecOennqe8JgBVVz@cluster0.1ya69kg.mongodb.net/lisa_db?retryWrites=true&w=majority';
 const PORT = process.env.PORT || 3000;
 
