@@ -14,6 +14,17 @@ const silence = require('./core/silence.js');
 const strategyEngine = require('./core/strategyEngine.js');
 const scrapeWebsite = require('./core/webScraper.js');
 const Tenant = require('./models/Tenant');
+const {
+  ONBOARDING_FIELDS,
+  detectOnboardingData,
+  getMissingFields,
+  getNextQuestion,
+  generateSummary,
+  generateSlug,
+  generateSystemPrompt
+} = require('./core/onboardingEngine.js');
+
+const onboardingSessions = {};
 
 console.log('TIPO DO SCRAPER:', typeof scrapeWebsite);
 
