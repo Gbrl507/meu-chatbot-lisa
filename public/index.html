@@ -573,7 +573,7 @@ if ('serviceWorker' in navigator) {
 
 <div class="shell">
   <nav>
-    <div class="logo"><div class="logo-ring">✦</div>LISA</div>
+    <div class="logo"><div class="logo-ring">✦</div>KIRA</div>
 
     <div class="niches">
       <button class="nb"        id="nb-l" onclick="setTheme('luxury',this)">✦ Luxo</button>
@@ -730,8 +730,7 @@ if ('serviceWorker' in navigator) {
         </div>
 
         <div class="av-info-col">
-        <div class="av-name">LISA</div>
-        <div class="av-role">Consultora de Estética Prime</div>
+        <div class="av-name" id="av-name">KIRA</div>        <div class="av-role" id="av-role">Consultora Autônoma de Vendas</div>
         <div class="av-stats">
           <div class="av-stat"><div class="av-stat-v">94%</div><div class="av-stat-l">Satisfação</div></div>
           <div class="av-stat"><div class="av-stat-v" id="stat-r">1.2s</div><div class="av-stat-l">Resposta</div></div>
@@ -932,12 +931,7 @@ const API_CONFIG = {
 
   // 🏷️ Slugs dos tenants cadastrados via POST /admin/setup-tenant
   // Estes valores devem ser EXATAMENTE iguais ao campo "slug" no MongoDB
-  slugs: {
-    luxury: 'estetica-prime',   // ← mude para o slug exato do seu tenant de imóveis
-    tech:   'estetica-prime',      // ← mude para o slug exato do seu tenant tech
-    retail: 'estetica-prime',    // ← mude para o slug exato do seu tenant varejo
-  },
-
+  slugs: slug: new URLSearchParams(window.location.search).get('tenant') || 'estetica-prime',
   // 👤 ID do usuário — gerado uma vez por sessão
   // O servidor usa este ID para memória, histórico e scoring
   userId: (function() {
@@ -952,7 +946,7 @@ const API_CONFIG = {
 
 // Slug ativo baseado no tema atual
 function getSlug() {
-  return API_CONFIG.slugs[cur] || 'tech';
+ return API_CONFIG.slug;
 }
 
 // ── FUNÇÃO PRINCIPAL DE ENVIO PARA SUA IA ─────────────────────
