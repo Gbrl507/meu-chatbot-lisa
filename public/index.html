@@ -931,7 +931,7 @@ const API_CONFIG = {
 
   // 🏷️ Slugs dos tenants cadastrados via POST /admin/setup-tenant
   // Estes valores devem ser EXATAMENTE iguais ao campo "slug" no MongoDB
-  slugs: slug: new URLSearchParams(window.location.search).get('tenant') || 'estetica-prime',
+ slug: new URLSearchParams(window.location.search).get('tenant') || 'estetica-prime',
   // 👤 ID do usuário — gerado uma vez por sessão
   // O servidor usa este ID para memória, histórico e scoring
   userId: (function() {
