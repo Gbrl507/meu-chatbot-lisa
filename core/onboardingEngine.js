@@ -1,20 +1,139 @@
-const cors = require('cors');
-require('dotenv').config(); 
-const express = require('express');
-const mongoose = require('mongoose');
-const path = require('path');
-const fs = require('fs');
-const Groq = require('groq-sdk');
+// core/onboardingEngine.js
+// Lisa extrai dados do negócio conversando naturalmente
 
-const scoringEngine = require('./core/scoringEngine.js');
-const memoryEngine = require('./core/memoryEngine.js');
-const stateDetector = require('./core/stateDetector.js');
-const promptComposer = require('./core/promptComposer.js');
-const silence = require('./core/silence.js');
-const strategyEngine = require('./core/strategyEngine.js');
-const scrapeWebsite = require('./core/webScraper.js');
-const Tenant = require('./models/Tenant');
-const {
+const ONBOARDING_FIELDS = {
+  businessName: { label: 'nome do negócio', extracted: false, value: null },
+  product: { label: 'produto ou serviço', extracted: false, value: null },
+  price: { label: 'preço ou valor', extracted: false, value: null },
+  audience: { label: 'público-alvo', extracted: false, value: null },
+  differentials: { label: 'diferenciais', extracted: false, value: null },
+  whatsapp: { label: 'WhatsApp', extracted: false, value: null }
+};
+
+function detectOnboardingData(message, currentData) {
+  const msg = message.toLowerCase();
+  const data = { ...currentData };
+
+  // Nome do negócio
+  if (!data.businessName.extracted) {
+    const patterns = [
+      /(?:chamo|sou|empresa|negócio|meu negócio|minha empresa|nome é|se chama|chamamos)\s+(?:de\s+)?([A-ZÀ-Ú][a-zA-ZÀ-ú\s&]+)/i,
+      /([A-ZÀ-Ú][a-zA-ZÀ-ú\s&]{2,30})(?:\s+é meu|\s+é minha|\s+é nossa)/i
+    ];
+    for (const p of patterns) {
+      const m = message.match(p);
+      if (m) { data.businessName = { ...data.businessName, extracted: true, value: m[1].trim() }; break; }
+    }
+  }
+
+  // Produto/serviço
+  if (!data.product.extracted) {
+    const patterns = [
+      /(?:vendo|vendemos|ofereço|trabalhamos com|faço|fazemos|prestamos|serviço de|produto é|produtos são)\s+(.{5,80}?)(?:\.|,|!|\?|$)/i,
+      /(?:meu produto|nosso produto|meu serviço|nosso serviço)\s+(?:é|são)\s+(.{5,80}?)(?:\.|,|!|\?|$)/i
+    ];
+    for (const p of patterns) {
+      const m = message.match(p);
+      if (m) { data.product = { ...data.product, extracted: true, value: m[1].trim() }; break; }
+    }
+  }
+
+  // Preço
+  if (!data.price.extracted) {
+    const patterns = [
+      /(?:r\$|reais|custa|valor|preço|investimento|mensalidade|parcela)\s*(?:de\s*)?(\d+[\.,]?\d*(?:\s*(?:mil|k|reais))?)/i,
+      /(\d+[\.,]?\d*)\s*(?:reais|r\$|mil|k)/i
+    ];
+    for (const p of patterns) {
+      const m = message.match(p);
+      if (m) { data.price = { ...data.price, extracted: true, value: m[1].trim() }; break; }
+    }
+  }
+
+  // Público-alvo
+  if (!data.audience.extracted) {
+    const patterns = [
+      /(?:meu público|nosso público|atendo|atendemos|clientes são|cliente ideal|foco em|voltado para|para\s+(?:pessoas|quem|mulheres|homens|empresas|donos|profissionais))\s+(.{5,100}?)(?:\.|,|!|\?|$)/i
+    ];
+    for (const p of patterns) {
+      const m = message.match(p);
+      if (m) { data.audience = { ...data.audience, extracted: true, value: m[1].trim() }; break; }
+    }
+  }
+
+  // Diferencial
+  if (!data.differentials.extracted) {
+    const patterns = [
+      /(?:diferencial|diferente|destaque|especial|único|melhor|vantagem|benefício)\s+(?:é|são|que)\s+(.{5,100}?)(?:\.|,|!|\?|$)/i
+    ];
+    for (const p of patterns) {
+      const m = message.match(p);
+      if (m) { data.differentials = { ...data.differentials, extracted: true, value: m[1].trim() }; break; }
+    }
+  }
+
+  // WhatsApp
+  if (!data.whatsapp.extracted) {
+    const m = message.match(/(?:\+?55\s?)?(?:\(?\d{2}\)?\s?)?\d{4,5}[-\s]?\d{4}/);
+    if (m) { data.whatsapp = { ...data.whatsapp, extracted: true, value: m[0].trim() }; }
+  }
+
+  return data;
+}
+
+function getMissingFields(data) {
+  // whatsapp e differentials são opcionais — só exige os essenciais
+  const required = ['businessName', 'product', 'price', 'audience'];
+  return required.filter(k => !data[k].extracted);
+}
+
+function getNextQuestion(missingFields) {
+  const questions = {
+    businessName: "Qual é o nome do seu negócio?",
+    product: "O que você vende? Me conta sobre seu produto ou serviço.",
+    price: "Qual é o valor ou preço do que você oferece?",
+    audience: "Quem é seu cliente ideal? Para quem você vende?",
+    differentials: "O que diferencia você da concorrência?",
+    whatsapp: "Qual é o WhatsApp para contato?"
+  };
+  return questions[missingFields[0]];
+}
+
+function generateSummary(data) {
+  return `Perfeito! Deixa eu confirmar o que entendi:
+
+🏢 Negócio: ${data.businessName.value || 'não informado'}
+📦 Produto/Serviço: ${data.product.value || 'não informado'}
+💰 Valor: R$ ${data.price.value || 'não informado'}
+🎯 Público: ${data.audience.value || 'não informado'}
+${data.differentials.value ? `⭐ Diferencial: ${data.differentials.value}` : ''}
+${data.whatsapp.value ? `📱 WhatsApp: ${data.whatsapp.value}` : ''}
+
+Está tudo certo? Se sim, já configuro tua Lisa! 🚀`;
+}
+
+function generateSlug(businessName) {
+  return businessName
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .substring(0, 40) + '-' + Date.now().toString().slice(-4);
+}
+
+function generateSystemPrompt(data) {
+  return `Você é Lisa, consultora especialista em ${data.product.value}. 
+Você trabalha para ${data.businessName.value}.
+Seu objetivo é converter leads em clientes com neuropsicologia aplicada.
+Produto: ${data.product.value}
+Valor: R$ ${data.price.value}
+Público-alvo: ${data.audience.value}
+${data.differentials.value ? `Diferencial: ${data.differentials.value}` : ''}
+Sempre foque em entender a dor do cliente e conectar ao produto.`;
+}
+
+module.exports = {
   ONBOARDING_FIELDS,
   detectOnboardingData,
   getMissingFields,
@@ -22,248 +141,4 @@ const {
   generateSummary,
   generateSlug,
   generateSystemPrompt
-} = require('./core/onboardingEngine.js');
-
-const GROQ_KEY = process.env.GROQ_API_KEY;
-const DB = process.env.MONGODB_URI || 'mongodb+srv://luisgabriel5073234_db_user:AecOennqe8JgBVVz@cluster0.1ya69kg.mongodb.net/lisa_db?retryWrites=true&w=majority';
-const PORT = process.env.PORT || 3000;
-
-mongoose.connect(DB)
-  .then(() => console.log("✅ Banco Conectado!"))
-  .catch(err => console.error("❌ MongoDB:", err));
-
-const app = express();
-app.use(express.json());
-app.use(cors());
-app.use(express.static(path.join(__dirname, 'public')));
-
-const groq = new Groq({ apiKey: GROQ_KEY });
-console.log("✅ Groq OK!");
-
-let userMemory = {};
-const userHistories = {};
-const MEMORY_FILE = path.join(__dirname, 'user_memory.json');
-const HISTORY_FILE = path.join(__dirname, 'user_histories.json');
-
-// Onboarding sessions em memória (por userId)
-const onboardingSessions = {};
-
-function loadLocalData() {
-    try {
-        if (fs.existsSync(MEMORY_FILE)) userMemory = JSON.parse(fs.readFileSync(MEMORY_FILE, 'utf-8'));
-        if (fs.existsSync(HISTORY_FILE)) Object.assign(userHistories, JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf-8')));
-    } catch (e) { console.error("Erro JSONs:", e); }
-}
-loadLocalData();
-
-function saveLocalData() {
-    fs.writeFileSync(MEMORY_FILE, JSON.stringify(userMemory, null, 2));
-    fs.writeFileSync(HISTORY_FILE, JSON.stringify(userHistories, null, 2));
-}
-
-function pushToHistory(userId, role, content) {
-    if (!userHistories[userId]) userHistories[userId] = [];
-    userHistories[userId].push({ role, content });
-    if (userHistories[userId].length > 20) userHistories[userId] = userHistories[userId].slice(-20);
-    saveLocalData();
-}
-
-// ═══════════════════════════════════════════════
-// ROTA ONBOARDING — Lisa conversa e cria tenant
-// ═══════════════════════════════════════════════
-app.post('/onboarding', async (req, res) => {
-  const { userId = 'anon', message } = req.body;
-  if (!message) return res.status(400).json({ error: 'Falta mensagem.' });
-
-  try {
-    // Inicializa sessão se não existir
-    if (!onboardingSessions[userId]) {
-      onboardingSessions[userId] = {
-        data: JSON.parse(JSON.stringify(ONBOARDING_FIELDS)),
-        step: 'collecting',
-        awaitingConfirmation: false
-      };
-
-      // Primeira mensagem — Lisa se apresenta
-      const welcome = `Que prazer! Sou a Lisa, sua nova vendedora autônoma. 🚀
-
-Vou configurar tudo pra você em poucos minutos só conversando.
-
-Pra começar — qual é o nome do seu negócio?`;
-
-      return res.json({ ok: true, reply: welcome, step: 'collecting', progress: 0 });
-    }
-
-    const session = onboardingSessions[userId];
-
-    // Aguardando confirmação do resumo
-    if (session.awaitingConfirmation) {
-      const msg = message.toLowerCase();
-      const confirmed = ['sim', 'yes', 'correto', 'certo', 'perfeito', 'isso', 'exato', 'ok', 'pode', 'confirmo'].some(w => msg.includes(w));
-      const denied = ['não', 'nao', 'errado', 'errei', 'corrige', 'muda', 'alterar'].some(w => msg.includes(w));
-
-      if (confirmed) {
-        // CRIAR TENANT AUTOMATICAMENTE
-        const data = session.data;
-        const slug = generateSlug(data.businessName.value);
-        const systemPromptBase = generateSystemPrompt(data);
-
-        const novoTenant = new Tenant({
-          slug,
-          name: data.businessName.value,
-          nicho: data.product.value,
-          systemPromptBase,
-          trainingData: `Negócio: ${data.businessName.value}\nProduto: ${data.product.value}\nValor: R$ ${data.price.value}\nPúblico: ${data.audience.value}\nDiferencial: ${data.differentials.value || 'não informado'}`,
-          contactInfo: { whatsapp: data.whatsapp.value || '' }
-        });
-
-        await novoTenant.save();
-
-        // Limpa sessão
-        delete onboardingSessions[userId];
-
-        return res.json({
-          ok: true,
-          reply: `✅ Perfeito! Sua Lisa está configurada e pronta pra vender!
-
-🔗 Seu link exclusivo:
-*https://meu-chatbot-lisa.onrender.com?tenant=${slug}*
-
-Compartilha esse link com seus clientes — a Lisa já começa a vender agora! 🚀`,
-          step: 'complete',
-          tenant: { slug, name: data.businessName.value }
-        });
-
-      } else if (denied) {
-        session.awaitingConfirmation = false;
-        return res.json({
-          ok: true,
-          reply: "Tudo bem! O que precisa corrigir? Me fala que ajusto.",
-          step: 'collecting'
-        });
-      } else {
-        return res.json({
-          ok: true,
-          reply: "Confirma os dados acima? É só dizer sim ou me fala o que precisa corrigir.",
-          step: 'awaiting_confirmation'
-        });
-      }
-    }
-
-    // EXTRAIR DADOS DA MENSAGEM
-    session.data = detectOnboardingData(message, session.data);
-    const missing = getMissingFields(session.data);
-    const total = 4; // campos obrigatórios
-    const extracted = total - missing.length;
-    const progress = Math.round((extracted / total) * 100);
-
-    // Todos os campos coletados — mostrar resumo
-    if (missing.length === 0) {
-      session.awaitingConfirmation = true;
-      const summary = generateSummary(session.data);
-      return res.json({
-        ok: true,
-        reply: summary,
-        step: 'awaiting_confirmation',
-        progress: 100
-      });
-    }
-
-    // Ainda faltam campos — próxima pergunta
-    const nextQuestion = getNextQuestion(missing);
-    
-    // Resposta natural com a próxima pergunta
-    let reply = '';
-    if (extracted > 0) {
-      const confirmations = ['Anotado!', 'Perfeito!', 'Ótimo!', 'Entendi!'];
-      reply = confirmations[Math.floor(Math.random() * confirmations.length)] + ' ';
-    }
-    reply += nextQuestion;
-
-    return res.json({
-      ok: true,
-      reply,
-      step: 'collecting',
-      progress,
-      missing
-    });
-
-  } catch (err) {
-    console.error('❌ Onboarding:', err);
-    res.status(500).json({ error: 'Erro no onboarding' });
-  }
-});
-
-// ═══════════════════════════════════════════════
-// ROTA ADMIN — setup manual de tenant
-// ═══════════════════════════════════════════════
-app.post('/admin/setup-tenant', async (req, res) => {
-    const { slug, name, nicho, url, systemPromptBase, whatsapp } = req.body;
-    try {
-        const content = url ? await scrapeWebsite(url) : '';
-        const novoTenant = new Tenant({ slug, name, nicho, systemPromptBase, trainingData: content || "Sem dados", contactInfo: { whatsapp } });
-        await novoTenant.save();
-        res.json({ ok: true, message: `Cliente ${name} cadastrado!` });
-    } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.get('/admin/tenants', async (req, res) => {
-    try {
-        const tenants = await Tenant.find();
-        res.json(tenants);
-    } catch (err) { res.status(500).json({ error: "Erro ao buscar clientes." }); }
-});
-
-// ═══════════════════════════════════════════════
-// ROTA CHAT — Lisa vende para leads
-// ═══════════════════════════════════════════════
-app.post('/chat', async (req, res) => {
-    const { userId = 'anon', message, slug } = req.body; 
-    if (!message || !slug) return res.status(400).json({ error: 'Falta mensagem ou slug.' });
-    try {
-        const tenant = await Tenant.findOne({ slug });
-        if (!tenant) return res.status(404).json({ error: "Tenant não encontrado." });
-
-        // userId isolado por tenant
-        const tenantUserId = `${slug}__${userId}`;
-
-        pushToHistory(tenantUserId, 'user', message);
-        const state = stateDetector(message); 
-        userMemory[tenantUserId] = memoryEngine(userMemory[tenantUserId] || {}, message, state);
-        saveLocalData();
-
-        const score = scoringEngine({ message, state: state.awareness, memory: userMemory[tenantUserId], history: userHistories[tenantUserId] });
-        const strategy = strategyEngine(state, score, userHistories[tenantUserId]);
-        const silenceDuration = silence(state.profile, state.awareness);
-
-        if (silenceDuration > 15000 && state.resistance) {
-            return res.json({ ok: true, reply: "Estou analisando sua situação..." });
-        }
-
-        await new Promise(resolve => setTimeout(resolve, silenceDuration));
-
-        const systemPrompt = promptComposer({ 
-          userId: tenantUserId, 
-          memory: userMemory[tenantUserId], 
-          state, strategy, score, 
-          context: tenant.trainingData, 
-          role: tenant.systemPromptBase 
-        });
-
-        const completion = await groq.chat.completions.create({
-            model: 'llama-3.3-70b-versatile',
-            messages: [{ role: 'system', content: systemPrompt }, ...userHistories[tenantUserId]],
-            temperature: 0.5
-        });
-
-        const reply = completion?.choices?.[0]?.message?.content;
-        pushToHistory(tenantUserId, 'assistant', reply);
-        res.json({ ok: true, reply });
-
-    } catch (err) {
-        console.error('❌ Chat:', err);
-        res.status(500).json({ error: 'Erro interno' });
-    }
-});
-
-app.listen(PORT, () => console.log(`🚀 LISA ON - PORTA ${PORT}`));
+};
