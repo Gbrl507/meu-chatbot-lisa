@@ -863,13 +863,36 @@ function setTheme(key, btn) {
 addEventListener('DOMContentLoaded', () => {
   const b = document.getElementById('nb-t');
   if(b){ b.style.background='#00FFCC'; b.style.color='#000'; }
-  // Set initial status
   const st = document.getElementById('st');
   if(st) st.textContent = 'IA Ativa · Modo Tech';
-  // Set initial theme var
   document.getElementById('root').setAttribute('data-theme', '');
-});
 
+  // Modo onboarding
+  if (window.location.href.includes('mode=onboarding')) {
+    document.querySelector('.av-role').textContent = 'Configurando sua IA';
+    document.querySelector('.chat-title').innerHTML = '<div class="sdot"></div>Configure sua KIRA';
+    document.querySelector('.chat-sub').textContent = 'Responda naturalmente · menos de 5 minutos';
+    document.getElementById('inp').placeholder = 'Responda KIRA aqui…';
+    document.querySelector('.quick').style.display = 'none';
+    document.querySelector('.av-stats').style.display = 'none';
+    setTimeout(async () => {
+      showTyping();
+      try {
+        const res = await fetch(API_CONFIG.baseUrl + '/onboarding', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: OB_USER_ID, message: '__init__' }),
+        });
+        const data = await res.json();
+        rmTyping();
+        if (data.reply) appendMsg(data.reply, 'lisa');
+      } catch {
+        rmTyping();
+        appendMsg('Oi! Sou a KIRA 👋 Vou configurar sua IA de vendas em menos de 5 minutos. Qual é o seu nome?', 'lisa');
+      }
+    }, 1200);
+  }
+});
 // ════════════════════════════════════════════════════════════════
 //  CHAT
 // ════════════════════════════════════════════════════════════════
