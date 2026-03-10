@@ -47,6 +47,8 @@ app.get('/configurar', (req, res) => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 const groq = new Groq({ apiKey: GROQ_KEY });
+const MEMORY_FILE = path.join(__dirname, 'user_memory.json');
+const HISTORY_FILE = path.join(__dirname, 'user_histories.json');
 
 function loadLocalData() {
     try {
