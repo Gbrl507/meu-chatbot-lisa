@@ -49,7 +49,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 const groq = new Groq({ apiKey: GROQ_KEY });
 const MEMORY_FILE = path.join(__dirname, 'user_memory.json');
 const HISTORY_FILE = path.join(__dirname, 'user_histories.json');
-
+let userMemory = {};
+const userHistories = {};
 function loadLocalData() {
     try {
         if (fs.existsSync(MEMORY_FILE)) userMemory = JSON.parse(fs.readFileSync(MEMORY_FILE, 'utf-8'));
