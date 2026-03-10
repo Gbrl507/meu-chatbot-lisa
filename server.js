@@ -48,6 +48,10 @@ let userMemory = {};
 const userHistories = {};
 const MEMORY_FILE = path.join(__dirname, 'user_memory.json');
 const HISTORY_FILE = path.join(__dirname, 'user_histories.json');
+// Serve onboarding.html diretamente
+app.get('/configurar', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'onboarding.html'));
+});
 
 function loadLocalData() {
     try {
