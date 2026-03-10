@@ -1,4 +1,4 @@
-kira avatar · HTML
+Lisa avatar · HTML
 Copiar
 
 <!DOCTYPE html>
@@ -1113,8 +1113,7 @@ setInterval(()=>{ const e=document.getElementById('stat-r'); if(e) e.textContent
 // ══════════════════════════════════════════════════════════════
 
 // ── DETECÇÃO DE MODO ──────────────────────────────────────────
-const IS_ONBOARDING = localStorage.getItem('kira_mode') === 'onboarding';
-localStorage.removeItem('kira_mode'); // limpa sempre, independente do valor
+const IS_ONBOARDING = window.location.href.includes('mode=onboarding');
 const OB_USER_ID = 'ob_' + (localStorage.getItem('kira_ob_id') || (() => {
   const id = Date.now() + '_' + Math.random().toString(36).substr(2,6);
   localStorage.setItem('kira_ob_id', id);
