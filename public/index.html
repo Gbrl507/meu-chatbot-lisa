@@ -1114,7 +1114,7 @@ setInterval(()=>{ const e=document.getElementById('stat-r'); if(e) e.textContent
 
 // ── DETECÇÃO DE MODO ──────────────────────────────────────────
 const IS_ONBOARDING = localStorage.getItem('kira_mode') === 'onboarding';
-if (IS_ONBOARDING) localStorage.removeItem('kira_mode');
+localStorage.removeItem('kira_mode'); // limpa sempre, independente do valor
 const OB_USER_ID = 'ob_' + (localStorage.getItem('kira_ob_id') || (() => {
   const id = Date.now() + '_' + Math.random().toString(36).substr(2,6);
   localStorage.setItem('kira_ob_id', id);
