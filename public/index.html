@@ -945,6 +945,12 @@ function rmTyping(){ const e=document.getElementById('typ'); if(e) e.remove(); }
 // ════════════════════════════════════════════════════════════════
 
 // ── CONFIGURAÇÃO — edite aqui ──────────────────────────────────
+const IS_ONBOARDING = window.location.pathname.includes('configurar');
+const OB_USER_ID = 'ob_' + (localStorage.getItem('kira_ob_id') || (() => {
+  const id = Date.now() + '_' + Math.random().toString(36).substr(2,6);
+  localStorage.setItem('kira_ob_id', id);
+  return id;
+})());
 const API_CONFIG = {
   // ⚙️ URL do seu servidor Node.js no VPS
   // Se o avatar está na mesma máquina que o server.js, use window.location.origin
@@ -1128,126 +1134,7 @@ setInterval(()=>{ const e=document.getElementById('stat-r'); if(e) e.textContent
     });
     requestAnimationFrame(draw);
   }
-  draw();
-})();// ══════════════════════════════════════════════════════════════
-// PATCH index.html — MODO ONBOARDING
-// Adiciona este bloco ANTES do fechamento </script> no final
-// ══════════════════════════════════════════════════════════════
-
-// ── DETECÇÃO DE MODO ──────────────────────────────────────────
-const IS_ONBOARDING = true;
-const OB_USER_ID = 'ob_' + (localStorage.getItem('kira_ob_id') || (() => {
-  const id = Date.now() + '_' + Math.random().toString(36).substr(2,6);
-  localStorage.setItem('kira_ob_id', id);
-  return id;
-})());
-
-// ── ONBOARDING MODE SETUP ─────────────────────────────────────
-if (IS_ONBOARDING) {
-
-  // Troca textos da interface
-  document.querySelector('.av-role').textContent = 'Configurando sua IA';
-  document.querySelector('.chat-title').innerHTML = '<div class="sdot"></div>Configure sua KIRA';
-  document.querySelector('.chat-sub').textContent = 'Responda naturalmente · menos de 5 minutos';
-  document.getElementById('inp').placeholder = 'Responda KIRA aqui…';
-
-  // Esconde quick prompts e stats
-  document.querySelector('.quick').style.display = 'none';
-  document.querySelector('.av-stats').style.display = 'none';
-
-  // Adiciona barra de progresso discreta no topo do chat
-  const chatHead = document.querySelector('.chat-head');
-  const progressDiv = document.createElement('div');
-  progressDiv.id = 'ob-progress';
-  progressDiv.innerHTML = `
-    <div style="padding:8px 20px;border-bottom:1px solid rgba(0,255,204,.08);">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
-        <span style="font-size:9px;color:rgba(255,255,255,.28);letter-spacing:1.5px;text-transform:uppercase;">Configuração</span>
-        <span id="ob-pct" style="font-size:9px;color:var(--c1);">0%</span>
-      </div>
-      <div style="height:2px;background:rgba(255,255,255,.06);border-radius:100px;overflow:hidden;">
-        <div id="ob-fill" style="height:100%;width:0%;background:linear-gradient(90deg,var(--c3),var(--c1));border-radius:100px;transition:width .6s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 8px var(--glow);"></div>
-      </div>
-    </div>`;
-  chatHead.appendChild(progressDiv);
-
-  // Substitui função send() por versão onboarding
-  window.send = async function() {
-    const el  = document.getElementById('inp');
-    const txt = el.value.trim();
-    if (!txt || speaking) return;
-
-    appendMsg(txt, 'user');
-    el.value = ''; el.style.height = '';
-    showTyping();
-
-    try {
-      const res = await fetch(API_CONFIG.baseUrl + '/onboarding', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: OB_USER_ID, message: txt }),
-      });
-      const data = await res.json();
-      rmTyping();
-      if (data.reply) appendMsg(data.reply, 'lisa');
-
-      // Atualiza progresso
-      if (data.progress !== undefined) {
-        document.getElementById('ob-fill').style.width = data.progress + '%';
-        document.getElementById('ob-pct').textContent = data.progress + '%';
-      }
-
-      // Onboarding completo — mostra link
-      if (data.step === 'complete' && data.link) {
-        setTimeout(() => showOnboardingSuccess(data.link, data.tenant), 1200);
-      }
-
-    } catch (err) {
-      rmTyping();
-      appendMsg('⚠️ Erro de conexão. Tente novamente.', 'lisa');
-    }
-  };
-
-  // Tela de sucesso inline no chat
-  function showOnboardingSuccess(link, tenant) {
-    const c = document.getElementById('msgs');
-    const d = document.createElement('div');
-    d.style.cssText = 'background:rgba(0,255,204,.06);border:1px solid rgba(0,255,204,.2);border-radius:14px;padding:16px;margin-top:8px;text-align:center;animation:mi .4s both';
-    d.innerHTML = `
-      <div style="font-size:22px;margin-bottom:8px;">🎉</div>
-      <div style="font-size:14px;font-weight:700;color:var(--c1);margin-bottom:6px;">KIRA ATIVADA!</div>
-      <div style="font-size:11px;color:rgba(255,255,255,.45);margin-bottom:12px;">Compartilha esse link com seus clientes:</div>
-      <div id="ob-link" style="background:rgba(0,0,0,.3);border:1px solid rgba(0,255,204,.15);border-radius:8px;padding:10px;font-size:11px;font-family:monospace;color:var(--c1);cursor:pointer;word-break:break-all;" onclick="copyObLink('${link}')">${link}</div>
-      <button onclick="copyObLink('${link}')" style="margin-top:10px;padding:8px 20px;border-radius:50px;background:linear-gradient(135deg,var(--c1),var(--c3));border:none;cursor:pointer;font-size:12px;font-weight:700;color:#000;font-family:inherit;">📋 Copiar Link</button>
-    `;
-    c.appendChild(d);
-    c.scrollTop = c.scrollHeight;
-  }
-
-  window.copyObLink = function(link) {
-    navigator.clipboard.writeText(link).then(() => {
-      appendMsg('✅ Link copiado! Agora conecta o WhatsApp Business ao link para ativar as vendas automáticas.', 'lisa');
-    });
-  };
-
- // KIRA inicia o onboarding automaticamente
-  setTimeout(async () => {
-    showTyping();
-    try {
-      const res = await fetch(API_CONFIG.baseUrl + '/onboarding', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: OB_USER_ID, message: '__init__' }),
-      });
-      const data = await res.json();
-      rmTyping();
-      if (data.reply) appendMsg(data.reply, 'lisa');
-    } catch {
-      rmTyping();
-      appendMsg('Oi! Sou a KIRA 👋 Vou configurar sua IA de vendas em menos de 5 minutos. Qual é o seu nome?', 'lisa');
-    }
-  }, 1200);
-}
+  draw();})();
 </script>
 </body>
 </html>
