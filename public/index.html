@@ -1006,8 +1006,31 @@ async function send() {
 
   appendMsg(txt, 'user');
   el.value = ''; el.style.height = '';
-
   showTyping();
+
+  if (IS_ONBOARDING) {
+    try {
+      const res = await fetch(API_CONFIG.baseUrl + '/onboarding', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: OB_USER_ID, message: txt }),
+      });
+      const data = await res.json();
+      rmTyping();
+      if (data.reply) appendMsg(data.reply, 'lisa');
+      if (data.progress !== undefined) {
+        document.getElementById('ob-fill').style.width = data.progress + '%';
+        document.getElementById('ob-pct').textContent = data.progress + '%';
+      }
+      if (data.step === 'complete' && data.link) {
+        setTimeout(() => showOnboardingSuccess(data.link, data.tenant), 1200);
+      }
+    } catch (err) {
+      rmTyping();
+      appendMsg('⚠️ Erro de conexão. Tente novamente.', 'lisa');
+    }
+    return;
+  }
 
   try {
     const reply = await callLisaAPI(txt);
@@ -1023,7 +1046,6 @@ async function send() {
 function sq(t){ document.getElementById('inp').value=t; send(); }
 function hk(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); send(); } }
 function ah(el){ el.style.height=''; el.style.height=Math.min(el.scrollHeight,110)+'px'; }
-
 // MIC
 let micOn=false;
 function toggleMic(){
