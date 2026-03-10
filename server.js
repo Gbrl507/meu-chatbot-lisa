@@ -39,19 +39,14 @@ mongoose.connect(DB)
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use(express.static(path.join(__dirname, 'public')));
 
-const groq = new Groq({ apiKey: GROQ_KEY });
-console.log("✅ Groq OK!");
-
-let userMemory = {};
-const userHistories = {};
-const MEMORY_FILE = path.join(__dirname, 'user_memory.json');
-const HISTORY_FILE = path.join(__dirname, 'user_histories.json');
-// Serve onboarding.html diretamente
 app.get('/configurar', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'onboarding.html'));
 });
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+const groq = new Groq({ apiKey: GROQ_KEY });
 
 function loadLocalData() {
     try {
