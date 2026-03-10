@@ -71,13 +71,17 @@ function pushToHistory(userId, role, content) {
   const { userId = 'anon', message } = req.body;
   if (!message) return res.status(400).json({ error: 'Falta mensagem.' });
   try {
+// Ignora mensagem de init — força nova sessão
+if (message === '__init__') {
+  delete onboardingSessions[userId];
+}
     if (!onboardingSessions[userId]) {
       onboardingSessions[userId] = {
         data: JSON.parse(JSON.stringify(ONBOARDING_FIELDS)),
         step: 'collecting',
         awaitingConfirmation: false
       };
-      return res.json({ ok: true, reply: `Que prazer! Sou a KIRA 👋 🚀\n\nVou configurar tudo pra você em poucos minutos só conversando.\n\nQual é o nome do seu negócio?`, step: 'collecting', progress: 0 });
+     return res.json({ ok: true, reply: `Oi! Sou a KIRA 👋\nVou configurar sua IA de vendas em menos de 5 minutos.\nQual é o seu nome?`, step: 'collecting', progress: 0 });
     }
     const session = onboardingSessions[userId];
     if (session.awaitingConfirmation) {
