@@ -67,7 +67,57 @@ function pushToHistory(userId, role, content) {
     userHistories[userId].push({ role, content });
     if (userHistories[userId].length > 20) userHistories[userId] = userHistories[userId].slice(-20);
     saveLocalData();
-}
+}app.post('/onboarding', async (req, res) => {
+  const { userId = 'anon', message } = req.body;
+  if (!message) return res.status(400).json({ error: 'Falta mensagem.' });
+  try {
+    if (!onboardingSessions[userId]) {
+      onboardingSessions[userId] = {
+        data: JSON.parse(JSON.stringify(ONBOARDING_FIELDS)),
+        step: 'collecting',
+        awaitingConfirmation: false
+      };
+      return res.json({ ok: true, reply: `Que prazer! Sou a KIRA 👋 🚀\n\nVou configurar tudo pra você em poucos minutos só conversando.\n\nQual é o nome do seu negócio?`, step: 'collecting', progress: 0 });
+    }
+    const session = onboardingSessions[userId];
+    if (session.awaitingConfirmation) {
+      const msg = message.toLowerCase();
+      const confirmed = ['sim','yes','correto','certo','perfeito','isso','exato','ok','pode','confirmo'].some(w => msg.includes(w));
+      const denied = ['não','nao','errado','corrige','muda','alterar'].some(w => msg.includes(w));
+      if (confirmed) {
+        const data = session.data;
+        const slug = generateSlug(data.businessName.value);
+        const novoTenant = new Tenant({
+          slug, name: data.businessName.value, nicho: data.product.value,
+          systemPromptBase: generateSystemPrompt(data),
+          trainingData: `Negócio: ${data.businessName.value}\nProduto: ${data.product.value}\nValor: R$ ${data.price.value}\nPúblico: ${data.audience.value}`,
+          contactInfo: { whatsapp: data.whatsapp.value || '' }
+        });
+        await novoTenant.save();
+        delete onboardingSessions[userId];
+        return res.json({ ok: true, reply: `✅ Sua Lisa está configurada!\n\n🔗 Seu link exclusivo:\nhttps://meu-chatbot-lisa.onrender.com?tenant=${slug}\n\nCompartilha com seus clientes — a Lisa já começa a vender! 🚀`, step: 'complete', tenant: { slug, name: data.businessName.value } });
+      } else if (denied) {
+        session.awaitingConfirmation = false;
+        return res.json({ ok: true, reply: "Tudo bem! O que precisa corrigir?", step: 'collecting' });
+      } else {
+        return res.json({ ok: true, reply: "Confirma os dados? É só dizer sim ou me fala o que corrigir.", step: 'awaiting_confirmation' });
+      }
+    }
+    session.data = detectOnboardingData(message, session.data);
+    const missing = getMissingFields(session.data);
+    const progress = Math.round(((4 - missing.length) / 4) * 100);
+    if (missing.length === 0) {
+      session.awaitingConfirmation = true;
+      return res.json({ ok: true, reply: generateSummary(session.data), step: 'awaiting_confirmation', progress: 100 });
+    }
+    const confirmations = ['Anotado!','Perfeito!','Ótimo!','Entendi!'];
+    const reply = (session.data.businessName.extracted || session.data.product.extracted ? confirmations[Math.floor(Math.random()*confirmations.length)] + ' ' : '') + getNextQuestion(missing);
+    return res.json({ ok: true, reply, step: 'collecting', progress, missing });
+  } catch (err) {
+    console.error('❌ Onboarding:', err);
+    res.status(500).json({ error: 'Erro no onboarding' });
+  }
+});
 
 app.post('/admin/setup-tenant', async (req, res) => {
     const { slug, name, nicho, url, systemPromptBase, whatsapp } = req.body;
@@ -118,4 +168,4 @@ app.post('/chat', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => console.log(`🚀 LISA ON - PORTA ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 KIRA ON - PORTA ${PORT}`));
