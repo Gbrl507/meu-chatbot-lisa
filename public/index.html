@@ -868,7 +868,7 @@ addEventListener('DOMContentLoaded', () => {
   document.getElementById('root').setAttribute('data-theme', '');
 
   // Modo onboarding
-  if (window.location.href.includes('mode=onboarding')) {
+  if (IS_ONBOARDING) {
     document.querySelector('.av-role').textContent = 'Configurando sua IA';
     document.querySelector('.chat-title').innerHTML = '<div class="sdot"></div>Configure sua KIRA';
     document.querySelector('.chat-sub').textContent = 'Responda naturalmente · menos de 5 minutos';
