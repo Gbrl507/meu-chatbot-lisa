@@ -14,18 +14,22 @@ function detectOnboardingData(message, currentData) {
   const msg = message.toLowerCase();
   const data = { ...currentData };
 
-  // Nome do negócio
+  // Nome do negócio — aceita qualquer resposta curta
   if (!data.businessName.extracted) {
     const patterns = [
       /(?:chamo|sou|empresa|negócio|meu negócio|minha empresa|nome é|se chama|chamamos)\s+(?:de\s+)?([A-ZÀ-Ú][a-zA-ZÀ-ú\s&]+)/i,
       /([A-ZÀ-Ú][a-zA-ZÀ-ú\s&]{2,30})(?:\s+é meu|\s+é minha|\s+é nossa)/i
     ];
+    let matched = false;
     for (const p of patterns) {
       const m = message.match(p);
-      if (m) { data.businessName = { ...data.businessName, extracted: true, value: m[1].trim() }; break; }
+      if (m) { data.businessName = { ...data.businessName, extracted: true, value: m[1].trim() }; matched = true; break; }
+    }
+    // Fallback: aceita qualquer texto como nome do negócio
+    if (!matched && message.trim().length > 1) {
+      data.businessName = { ...data.businessName, extracted: true, value: message.trim() };
     }
   }
-
   // Produto/serviço
   if (!data.product.extracted) {
     const patterns = [
