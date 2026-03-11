@@ -1024,10 +1024,7 @@ async function send() {
       const data = await res.json();
       rmTyping();
       if (data.reply) appendMsg(data.reply, 'lisa');
-      if (data.progress !== undefined) {
-        document.getElementById('ob-fill').style.width = data.progress + '%';
-        document.getElementById('ob-pct').textContent = data.progress + '%';
-      }
+      
       if (data.step === 'complete' && data.link) {
         setTimeout(() => showOnboardingSuccess(data.link, data.tenant), 1200);
       }
