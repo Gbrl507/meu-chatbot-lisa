@@ -41,7 +41,9 @@ app.use(express.json());
 app.use(cors());
 
 app.get('/configurar', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  let html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf-8');
+  html = html.replace("const IS_ONBOARDING = window.location.pathname.includes('configurar');", 'const IS_ONBOARDING = true;');
+  res.send(html);
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
