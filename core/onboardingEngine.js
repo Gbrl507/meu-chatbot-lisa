@@ -112,6 +112,7 @@ if (!data.whatsapp.extracted) {
 }
 
 return data;
+}
 
 function getMissingFields(data) {
   // whatsapp e differentials são opcionais — só exige os essenciais
