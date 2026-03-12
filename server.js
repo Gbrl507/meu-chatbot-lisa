@@ -1,4 +1,5 @@
 const cors = require('cors');
+const nocache = require('nocache');
 require('dotenv').config(); 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -39,6 +40,7 @@ mongoose.connect(DB)
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(nocache());
 
 app.get('/configurar', (req, res) => {
   let html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf-8');
