@@ -105,7 +105,7 @@ if (message === '__init__') {
         });
         await novoTenant.save();
         delete onboardingSessions[userId];
-        return res.json({ ok: true, reply: `✅ Sua Kira está configurada!\n\n🔗 Seu link exclusivo:\nhttps://meu-chatbot-lisa.onrender.com?tenant=${slug}\n\nCompartilha com seus clientes — a Lisa já começa a vender! 🚀`, step: 'complete', tenant: { slug, name: data.businessName.value } });
+        return res.json({ ok: true, reply: `✅ Sua Kira está configurada!\n\n🔗 Seu link exclusivo:\nhttps://meu-chatbot-lisa.onrender.com/?tenant=${slug}\n\nCompartilha com seus clientes — a kira já começa a vender! 🚀`, step: 'complete', tenant: { slug, name: data.businessName.value } });
       } else if (denied) {
         session.awaitingConfirmation = false;
         return res.json({ ok: true, reply: "Tudo bem! O que precisa corrigir?", step: 'collecting' });

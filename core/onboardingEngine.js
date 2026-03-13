@@ -42,36 +42,26 @@ function detectOnboardingData(message, currentData) {
     }
   }
 
- // Preço - mais flexível + fallback forte
+ // Preço - captura range completo (ex: R$2.000 – R$15.000)
 if (!data.price.extracted) {
-  let extracted = null;
-
-  // Padrão 1: palavra-chave + número (aceita "reias", "a partir de", etc.)
-  const pricePattern1 = /(?:r\$|reais|reias|custa|valor|pre[çc]o|investimento|mensalidade|parcela|a partir de|de)\s*(?:de\s*|a partir de\s*)?(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?)/i;
-  let m1 = message.match(pricePattern1);
-  if (m1 && m1[1]) extracted = m1[1].trim();
-
-  // Padrão 2: número + moeda depois
-  if (!extracted) {
-    const pricePattern2 = /(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?)\s*(?:reais|reias|r\$|mil|k)?/i;
-    let m2 = message.match(pricePattern2);
-    if (m2 && m2[1]) extracted = m2[1].trim();
+  const allPrices = [];
+  const priceMatches = [...message.matchAll(/R\$\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)|(\d{1,3}(?:[.,]\d{3})+(?:[.,]\d{2})?)/gi)];
+  
+  for (const m of priceMatches) {
+    const raw = (m[1] || m[2]).replace(/\./g, '').replace(',', '.');
+    const num = parseFloat(raw);
+    if (!isNaN(num) && num > 10) allPrices.push(num);
   }
 
-  // Fallback: pega o maior número da mensagem inteira (salva 99% dos casos reais)
-  if (!extracted) {
-    const numbers = message.match(/\d+(?:[.,]\d+)?/g) || [];
+  if (allPrices.length > 0) {
+    const min = Math.min(...allPrices);
+    const max = Math.max(...allPrices);
+    const valueStr = min === max ? `${min}` : `${min} a ${max}`;
+    data.price = { ...data.price, extracted: true, value: valueStr };
+  } else {
+    const numbers = [...(message.matchAll(/\d+/g))].map(m => parseInt(m[0])).filter(n => n > 10);
     if (numbers.length > 0) {
-      extracted = numbers.reduce((a, b) => parseFloat(a.replace(',', '.')) > parseFloat(b.replace(',', '.')) ? a : b);
-    }
-  }
-
-  if (extracted) {
-    // Limpa e salva como número
-    let cleanValue = extracted.replace(/[^0-9.,]/g, '').replace(',', '.');
-    let numValue = parseFloat(cleanValue);
-    if (!isNaN(numValue) && numValue > 0) {
-      data.price = { ...data.price, extracted: true, value: numValue };
+      data.price = { ...data.price, extracted: true, value: `${Math.max(...numbers)}` };
     }
   }
 }
@@ -142,7 +132,7 @@ function generateSummary(data) {
 ${data.differentials.value ? `⭐ Diferencial: ${data.differentials.value}` : ''}
 ${data.whatsapp.value ? `📱 WhatsApp: ${data.whatsapp.value}` : ''}
 
-Está tudo certo? Se sim, já configuro tua Lisa! 🚀`;
+Está tudo certo? Se sim, já configuro tua kira! 🚀`;
 }
 
 function generateSlug(businessName) {
@@ -156,7 +146,7 @@ function generateSlug(businessName) {
 }
 
 function generateSystemPrompt(data) {
-  return `Você é Lisa, consultora especialista em ${data.product.value}. 
+  return `Você é kira , consultora especialista em ${data.product.value}. 
 Você trabalha para ${data.businessName.value}.
 Seu objetivo é converter leads em clientes com neuropsicologia aplicada.
 Produto: ${data.product.value}
