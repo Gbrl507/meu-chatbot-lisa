@@ -66,29 +66,19 @@ if (!data.price.extracted) {
   }
 }
 
-// Público-alvo - regex melhorada (mais flexível, pega frases comuns)
+// Público-alvo - só extrai quando há palavras-chave claras
 if (!data.audience.extracted) {
-  const audiencePattern = /(?:público|público-alvo|clientes?|meu público|nosso público|atendo|atendemos|foco|voltado|para quem|ideal para|clientes ideais?|persona)\b[^.?!]{0,200}?(?:são|é|que|de|para|com|como)?\s+(.+?)(?:\.|$|!|\?|\n|$)/i;
+  const audiencePattern = /(?:público|público-alvo|clientes?|meu público|nosso público|atendo|atendemos|foco|voltado|para quem|ideal para|clientes ideais?|persona)\b.{0,100}?(?:são|é|:|\,)?\s*(.{5,100}?)(?:\.|$|!|\?|\n)/i;
   const m = message.match(audiencePattern);
   if (m && m[1] && m[1].trim().length > 5) {
     data.audience = { ...data.audience, extracted: true, value: m[1].trim() };
   }
-  // Fallback simples: se a mensagem tiver mais de 10 chars e não for número só, assume que é público
-  else if (message.trim().length > 15 && !/^\d/.test(message.trim())) {
-    data.audience = { ...data.audience, extracted: true, value: message.trim() };
-  }
 }
-
-// Diferencial - similar, mais tolerante
 if (!data.differentials.extracted) {
   const diffPattern = /(?:diferencial|diferenciais|diferente|destaque|especial|único|melhor|vantagem|benefício|o que nos diferencia|vantagens?|por que escolher|diferencia[íi]s)\b[^.?!]{0,200}?(?:é|são|que|é que)\s+(.+?)(?:\.|$|!|\?|\n|$)/i;
   const m = message.match(diffPattern);
   if (m && m[1] && m[1].trim().length > 5) {
     data.differentials = { ...data.differentials, extracted: true, value: m[1].trim() };
-  }
-  // Fallback
-  else if (message.trim().length > 20) {
-    data.differentials = { ...data.differentials, extracted: true, value: message.trim() };
   }
 }
 
