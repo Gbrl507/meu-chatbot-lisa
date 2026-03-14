@@ -20,11 +20,10 @@ function detectOnboardingData(message, currentData) {
       /(?:chamo|sou|empresa|negócio|meu negócio|minha empresa|nome é|se chama|chamamos)\s+(?:de\s+)?([A-ZÀ-Ú][a-zA-ZÀ-ú\s&]+)/i,
       /([A-ZÀ-Ú][a-zA-ZÀ-ú\s&]{2,30})(?:\s+é meu|\s+é minha|\s+é nossa)/i
     ];
-    let matched = false;
-    for (const p of patterns) {
-      const m = message.match(p);
-      if (m) { data.businessName = { ...data.businessName, extracted: true, value: m[1].trim() }; matched = true; break; }
-    // Fallback: só aceita se tiver pelo menos 3 chars e palavra real
+   for (const p of patterns) {
+  const m = message.match(p);
+  if (m) { data.businessName = { ...data.businessName, extracted: true, value: m[1].trim() }; matched = true; break; }
+}
 if (!matched && message.trim().length >= 3) {
   const words = message.trim().split(/\s+/);
   const hasRealWord = words.some(w => w.length >= 3 && !/^[^aeiouáéíóuàâêôãõ]{4,}$/i.test(w));
@@ -141,7 +140,6 @@ Público-alvo: ${data.audience.value}
 ${data.differentials.value ? `Diferencial: ${data.differentials.value}` : ''}
 Sempre foque em entender a dor do cliente e conectar ao produto.`;
 }
-
 module.exports = {
   ONBOARDING_FIELDS,
   detectOnboardingData,
