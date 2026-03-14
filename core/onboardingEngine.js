@@ -72,16 +72,10 @@ if (!data.audience.extracted) {
   const m = message.match(audiencePattern);
   if (m && m[1] && m[1].trim().length > 5) {
     data.audience = { ...data.audience, extracted: true, value: m[1].trim() };
+  } else if (message.trim().length > 10 && data.price.extracted && !data.product.value?.toLowerCase().includes(message.toLowerCase().substring(0,10))) {
+    data.audience = { ...data.audience, extracted: true, value: message.trim() };
   }
 }
-if (!data.differentials.extracted) {
-  const diffPattern = /(?:diferencial|diferenciais|diferente|destaque|especial|único|melhor|vantagem|benefício|o que nos diferencia|vantagens?|por que escolher|diferencia[íi]s)\b[^.?!]{0,200}?(?:é|são|que|é que)\s+(.+?)(?:\.|$|!|\?|\n|$)/i;
-  const m = message.match(diffPattern);
-  if (m && m[1] && m[1].trim().length > 5) {
-    data.differentials = { ...data.differentials, extracted: true, value: m[1].trim() };
-  }
-}
-
 // WhatsApp - já está bom, mas adiciona tolerância a espaços extras
 if (!data.whatsapp.extracted) {
   const cleaned = message.replace(/\s+/g, ''); // remove espaços pra pegar (11) 99999-9999
