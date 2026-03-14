@@ -121,8 +121,25 @@ if (message === '__init__') {
       return res.json({ ok: true, reply: generateSummary(session.data), step: 'awaiting_confirmation', progress: 100 });
     }
     const confirmations = ['Anotado!','Perfeito!','Ótimo!','Entendi!'];
-    const reply = (session.data.businessName.extracted || session.data.product.extracted ? confirmations[Math.floor(Math.random()*confirmations.length)] + ' ' : '') + getNextQuestion(missing);
-    return res.json({ ok: true, reply, step: 'collecting', progress, missing });
+// Verifica se extraiu algo novo
+const totalExtracted = Object.values(session.data).filter(f => f.extracted).length;
+const lastExtracted = req.body._lastExtracted || 0;
+const sameAsBefore = totalExtracted === lastExtracted;
+
+let reply;
+if (sameAsBefore && lastExtracted > 0) {
+  const hints = {
+    businessName: "Hmm, não entendi bem 😅 Me diz só o nome — exemplo: 'Advocacia Silva' ou 'Clínica Estética Prime'",
+    product: "Não captei! Me conta o que você vende — exemplo: 'vendo consultoria jurídica' ou 'faço limpeza de pele'",
+    price: "Não entendi o valor 😅 Exemplo: 'cobro R$500 por sessão' ou 'pacotes a partir de R$2.000'",
+    audience: "Me conta para quem você vende — exemplo: 'atendo empresários' ou 'meu público são mulheres de 30 a 50 anos'"
+  };
+  reply = hints[missing[0]] || getNextQuestion(missing);
+} else {
+  reply = (session.data.businessName.extracted || session.data.product.extracted ? confirmations[Math.floor(Math.random()*confirmations.length)] + ' ' : '') + getNextQuestion(missing);
+}
+
+return res.json({ ok: true, reply, step: 'collecting', progress, missing, _lastExtracted: totalExtracted });
   } catch (err) {
     console.error('❌ Onboarding:', err);
     res.status(500).json({ error: 'Erro no onboarding' });

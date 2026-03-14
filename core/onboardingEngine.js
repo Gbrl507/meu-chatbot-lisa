@@ -24,12 +24,14 @@ function detectOnboardingData(message, currentData) {
     for (const p of patterns) {
       const m = message.match(p);
       if (m) { data.businessName = { ...data.businessName, extracted: true, value: m[1].trim() }; matched = true; break; }
-    }
-    // Fallback: aceita qualquer texto como nome do negócio
-    if (!matched && message.trim().length > 1) {
-      data.businessName = { ...data.businessName, extracted: true, value: message.trim() };
-    }
+    // Fallback: só aceita se tiver pelo menos 3 chars e palavra real
+if (!matched && message.trim().length >= 3) {
+  const words = message.trim().split(/\s+/);
+  const hasRealWord = words.some(w => w.length >= 3 && !/^[^aeiouáéíóuàâêôãõ]{4,}$/i.test(w));
+  if (hasRealWord) {
+    data.businessName = { ...data.businessName, extracted: true, value: message.trim() };
   }
+}
   // Produto/serviço
   if (!data.product.extracted) {
     const patterns = [
