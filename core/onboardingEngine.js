@@ -35,7 +35,7 @@ function detectOnboardingData(message, currentData) {
     }
   }
 
-  if (!data.product.extracted) {
+ if (!data.product.extracted) {
     const patterns = [
       /(?:vendo|vendemos|ofereço|trabalhamos com|faço|fazemos|prestamos|serviço de|produto é|produtos são)\s+(.{5,80}?)(?:\.|,|!|\?|$)/i,
       /(?:meu produto|nosso produto|meu serviço|nosso serviço)\s+(?:é|são)\s+(.{5,80}?)(?:\.|,|!|\?|$)/i
@@ -49,14 +49,25 @@ function detectOnboardingData(message, currentData) {
         break;
       }
     }
-    if (!matched && message.trim().length >= 8) {
+    // Fallback — só extrai produto se o nome já foi capturado
+    // E se a mensagem for diferente do nome
+    if (!matched && data.businessName.extracted && message.trim().length >= 8) {
       const words = message.trim().split(/\s+/);
       const hasRealWords = words.some(w => w.length >= 4);
-      if (hasRealWords) {
+      const isDifferentFromName = !data.businessName.value?.toLowerCase().includes(message.toLowerCase().substring(0, 10));
+      if (hasRealWords && isDifferentFromName) {
         data.product = { ...data.product, extracted: true, value: message.trim() };
       }
     }
   }
+```
+
+A diferença chave:
+```
+ANTES: extrai produto com qualquer mensagem
+DEPOIS: só extrai produto se:
+  1. O nome já foi capturado
+  2. A mensagem é diferente do nome
 
   if (!data.price.extracted) {
     const allPrices = [];
