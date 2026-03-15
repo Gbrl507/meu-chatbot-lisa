@@ -1019,12 +1019,12 @@ async function send() {
       const res = await fetch(API_CONFIG.baseUrl + '/onboarding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: OB_USER_ID, message: txt }),
-      });
-      const data = await res.json();
+       body: JSON.stringify({ userId: OB_USER_ID, message: txt, _lastExtracted: window._lastExtracted || 0 }),
+
+    const data = await res.json();
       rmTyping();
       if (data.reply) appendMsg(data.reply, 'lisa');
-      
+      if (data._lastExtracted !== undefined) window._lastExtracted = data._lastExtracted;
       if (data.step === 'complete' && data.link) {
         setTimeout(() => showOnboardingSuccess(data.link, data.tenant), 1200);
       }
