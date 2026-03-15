@@ -49,8 +49,6 @@ function detectOnboardingData(message, currentData) {
         break;
       }
     }
-    // Fallback — só extrai produto se o nome já foi capturado
-    // E se a mensagem for diferente do nome
     if (!matched && data.businessName.extracted && message.trim().length >= 8) {
       const words = message.trim().split(/\s+/);
       const hasRealWords = words.some(w => w.length >= 4);
