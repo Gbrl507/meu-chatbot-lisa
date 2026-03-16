@@ -49,14 +49,15 @@ function detectOnboardingData(message, currentData) {
         break;
       }
     }
-    if (!matched && message.trim().length >= 8) {
+    if (!matched && data.businessName.extracted && message.trim().length >= 8) {
       const words = message.trim().split(/\s+/);
       const hasRealWords = words.some(w => w.length >= 4);
-      if (hasRealWords) {
+      const isDifferentFromName = !data.businessName.value?.toLowerCase().includes(message.toLowerCase().substring(0, 10));
+      const hasNoPersonalWords = !/\b(meu nome|sou|chamo)\b/i.test(message);
+      if (hasRealWords && isDifferentFromName && hasNoPersonalWords) {
         data.product = { ...data.product, extracted: true, value: message.trim() };
       }
     }
-  }
 
   if (!data.price.extracted) {
     const allPrices = [];
