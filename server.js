@@ -123,8 +123,20 @@ if (message === '__init__') {
     const confirmations = ['Anotado!','Perfeito!','Ótimo!','Entendi!'];
 // Verifica se extraiu algo novo
 const totalExtracted = Object.values(session.data).filter(f => f.extracted).length;
-const lastExtracted = req.body._lastExtracted || 0;
+const lastExtracted = req.body._lastExtracted ?? -1;
 const sameAsBefore = totalExtracted === lastExtracted;
+```
+
+A diferença:
+```
+ANTES: _lastExtracted começa em 0
+       totalExtracted também é 0
+       nunca detecta que não extraiu nada
+
+DEPOIS: _lastExtracted começa em -1
+        totalExtracted é 0
+        detecta imediatamente que não extraiu
+        mostra mensagem de orientação
 
 let reply;
 if (sameAsBefore && lastExtracted > 0) {
