@@ -12,6 +12,7 @@ function detectOnboardingData(message, currentData) {
   const msg = message.toLowerCase();
   const data = { ...currentData };
 
+  // Nome do negócio
   if (!data.businessName.extracted) {
     const patterns = [
       /(?:chamo|sou|empresa|negócio|meu negócio|minha empresa|nome é|se chama|chamamos)\s+(?:de\s+)?([A-ZÀ-Ú][a-zA-ZÀ-ú\s&]+)/i,
@@ -35,6 +36,7 @@ function detectOnboardingData(message, currentData) {
     }
   }
 
+  // Produto/serviço
   if (!data.product.extracted) {
     const patterns = [
       /(?:vendo|vendemos|ofereço|trabalhamos com|faço|fazemos|prestamos|serviço de|produto é|produtos são)\s+(.{5,80}?)(?:\.|,|!|\?|$)/i,
@@ -58,7 +60,9 @@ function detectOnboardingData(message, currentData) {
         data.product = { ...data.product, extracted: true, value: message.trim() };
       }
     }
+  }
 
+  // Preço
   if (!data.price.extracted) {
     const allPrices = [];
     const priceMatches = [...message.matchAll(/R\$\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)|(\d{1,3}(?:[.,]\d{3})+(?:[.,]\d{2})?)/gi)];
@@ -80,6 +84,7 @@ function detectOnboardingData(message, currentData) {
     }
   }
 
+  // Público-alvo
   if (!data.audience.extracted) {
     const audiencePattern = /(?:público|público-alvo|clientes?|meu público|nosso público|atendo|atendemos|foco|voltado|para quem|ideal para|clientes ideais?|persona)\b.{0,100}?(?:são|é|:|\,)?\s*(.{5,100}?)(?:\.|$|!|\?|\n)/i;
     const m = message.match(audiencePattern);
@@ -90,6 +95,7 @@ function detectOnboardingData(message, currentData) {
     }
   }
 
+  // Diferencial
   if (!data.differentials.extracted) {
     const diffPattern = /(?:diferencial|diferenciais|diferente|destaque|especial|único|melhor|vantagem|benefício|o que nos diferencia|vantagens?|por que escolher|diferencia[íi]s)\b[^.?!]{0,200}?(?:é|são|que|é que)\s+(.+?)(?:\.|$|!|\?|\n|$)/i;
     const m = message.match(diffPattern);
@@ -98,6 +104,7 @@ function detectOnboardingData(message, currentData) {
     }
   }
 
+  // WhatsApp
   if (!data.whatsapp.extracted) {
     const cleaned = message.replace(/\s+/g, '');
     const m = cleaned.match(/(?:\+?55)?(?:\(?\d{2}\)?)?\d{4,5}[-]?\d{4}/);
