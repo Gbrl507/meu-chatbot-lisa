@@ -129,10 +129,10 @@ const sameAsBefore = totalExtracted === lastExtracted;
 let reply;
 if (sameAsBefore && lastExtracted >= 0) { 
   const hints = {
-    businessName: "Hmm, não entendi bem 😅 Me diz só o nome — exemplo: 'Advocacia Silva' ou 'Clínica Estética Prime'",
-    product: "Não captei! Me conta o que você vende — exemplo: 'vendo consultoria jurídica' ou 'faço limpeza de pele'",
-    price: "Não entendi o valor 😅 Exemplo: 'cobro R$500 por sessão' ou 'pacotes a partir de R$2.000'",
-    audience: "Me conta para quem você vende — exemplo: 'atendo empresários' ou 'meu público são mulheres de 30 a 50 anos'"
+    businessName: "Hmm, não entendi bem 😅 Me diz só o nome da sua empresa — exemplo: 'Advocacia Silva' ou 'Clínica Estética Prime'. Qual é o nome do seu negócio?",
+    product: "Não captei! Me conta o que você vende — exemplo: 'vendo consultoria jurídica' ou 'faço limpeza de pele'. O que você vende?",
+    price: "Não entendi o valor 😅 Exemplo: 'cobro R$500 por sessão' ou 'pacotes a partir de R$2.000'. Qual é o seu preço?",
+    audience: "Me conta para quem você vende — exemplo: 'atendo empresários' ou 'meu público são mulheres de 30 a 50 anos'. Para quem você vende?"
   };
   reply = hints[missing[0]] || getNextQuestion(missing);
 } else {
