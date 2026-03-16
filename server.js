@@ -127,7 +127,7 @@ const lastExtracted = req.body._lastExtracted ?? -1;
 const sameAsBefore = totalExtracted === lastExtracted;
 
 let reply;
-if (sameAsBefore && lastExtracted >= 0) { 
+if (sameAsBefore) { 
   const hints = {
     businessName: "Hmm, não entendi bem 😅 Me diz só o nome da sua empresa — exemplo: 'Advocacia Silva' ou 'Clínica Estética Prime'. Qual é o nome do seu negócio?",
     product: "Não captei! Me conta o que você vende — exemplo: 'vendo consultoria jurídica' ou 'faço limpeza de pele'. O que você vende?",
