@@ -58,14 +58,6 @@ function detectOnboardingData(message, currentData) {
       }
     }
   }
-```
-
-A diferença chave:
-```
-ANTES: extrai produto com qualquer mensagem
-DEPOIS: só extrai produto se:
-  1. O nome já foi capturado
-  2. A mensagem é diferente do nome
 
   if (!data.price.extracted) {
     const allPrices = [];
