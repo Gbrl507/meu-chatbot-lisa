@@ -125,21 +125,9 @@ if (message === '__init__') {
 const totalExtracted = Object.values(session.data).filter(f => f.extracted).length;
 const lastExtracted = req.body._lastExtracted ?? -1;
 const sameAsBefore = totalExtracted === lastExtracted;
-```
-
-A diferença:
-```
-ANTES: _lastExtracted começa em 0
-       totalExtracted também é 0
-       nunca detecta que não extraiu nada
-
-DEPOIS: _lastExtracted começa em -1
-        totalExtracted é 0
-        detecta imediatamente que não extraiu
-        mostra mensagem de orientação
 
 let reply;
-if (sameAsBefore && lastExtracted > 0) {
+if (sameAsBefore && lastExtracted >= 0) { 
   const hints = {
     businessName: "Hmm, não entendi bem 😅 Me diz só o nome — exemplo: 'Advocacia Silva' ou 'Clínica Estética Prime'",
     product: "Não captei! Me conta o que você vende — exemplo: 'vendo consultoria jurídica' ou 'faço limpeza de pele'",
