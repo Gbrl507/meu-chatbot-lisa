@@ -123,11 +123,11 @@ if (message === '__init__') {
     const confirmations = ['Anotado!','Perfeito!','Ótimo!','Entendi!'];
 // Verifica se extraiu algo novo
 const totalExtracted = Object.values(session.data).filter(f => f.extracted).length;
-const lastExtracted = req.body._lastExtracted || 0;
+const lastExtracted = req.body._lastExtracted ?? -1;
 const sameAsBefore = totalExtracted === lastExtracted;
 
 let reply;
-if (sameAsBefore && lastExtracted > 0) {
+if (sameAsBefore && lastExtracted >= 0) { 
   const hints = {
     businessName: "Hmm, não entendi bem 😅 Me diz só o nome — exemplo: 'Advocacia Silva' ou 'Clínica Estética Prime'",
     product: "Não captei! Me conta o que você vende — exemplo: 'vendo consultoria jurídica' ou 'faço limpeza de pele'",
