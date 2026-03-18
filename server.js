@@ -104,8 +104,14 @@ if (message === '__init__') {
           contactInfo: { whatsapp: data.whatsapp.value || '' }
         });
         await novoTenant.save();
+        if (!global.ownerSessions) global.ownerSessions = {};
+        global.ownerSessions[userId] = {
+          slug,
+          name: data.businessName.value,
+          isOwner: true
+        };
         delete onboardingSessions[userId];
-        return res.json({ ok: true, reply: `✅ Sua Kira está configurada!\n\n🔗 Seu link exclusivo:\nhttps://meu-chatbot-lisa.onrender.com/?tenant=${slug}\n\nCompartilha com seus clientes — a kira já começa a vender! 🚀`, step: 'complete', tenant: { slug, name: data.businessName.value } });
+        return res.json({ ok: true, reply: `✅ Sua Kira está configurada!\n\n🔗 Link dos seus clientes:\nhttps://meu-chatbot-lisa.onrender.com/?tenant=${slug}\n\nAgora pode falar comigo normalmente! Me pergunta o que quiser sobre o seu negócio. 😊`, step: 'complete', tenant: { slug, name: data.businessName.value } });
       } else if (denied) {
         session.awaitingConfirmation = false;
         return res.json({ ok: true, reply: "Tudo bem! O que precisa corrigir?", step: 'collecting' });
@@ -113,6 +119,7 @@ if (message === '__init__') {
         return res.json({ ok: true, reply: "Confirma os dados? É só dizer sim ou me fala o que corrigir.", step: 'awaiting_confirmation' });
       }
     }
+     
     session.data = detectOnboardingData(message, session.data);
     const missing = getMissingFields(session.data);
     const progress = Math.round(((4 - missing.length) / 4) * 100);
