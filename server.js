@@ -105,7 +105,8 @@ app.post('/onboarding', async (req, res) => {
           slug, name: data.businessName.value, nicho: data.product.value,
           systemPromptBase: generateSystemPrompt(data),
           trainingData: `Negócio: ${data.businessName.value}\nProduto: ${data.product.value}\nValor: R$ ${data.price.value}\nPúblico: ${data.audience.value}`,
-          contactInfo: { whatsapp: data.whatsapp.value || '' }
+          contactInfo: { whatsapp: data.whatsapp.value || '' },
+          ownerUserId: userId
         });
         await novoTenant.save();
         if (!global.ownerSessions) global.ownerSessions = {};
@@ -179,8 +180,9 @@ app.post('/chat', async (req, res) => {
   const { userId = 'anon', message, slug } = req.body;
   if (!message || !slug) return res.status(400).json({ error: 'Falta mensagem ou slug.' });
   try {
-    const isOwner = global.ownerSessions && global.ownerSessions[userId]?.slug === slug;
-    const tenant = await Tenant.findOne({ slug });
+        const tenant = await Tenant.findOne({ slug });
+const isOwner = tenant && tenant.ownerUserId === userId;
+  
     if (!tenant) return res.status(404).json({ error: "Tenant não encontrado." });
     pushToHistory(userId, 'user', message);
     const state = stateDetector(message);
