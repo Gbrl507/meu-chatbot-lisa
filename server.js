@@ -170,24 +170,15 @@ app.get('/admin/tenants', async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Erro ao buscar clientes." }); }
 });
 
-app.post('/chat', async (req, res) => {
-    const { userId = 'anon', message, slug } = req.body; 
+const { userId = 'anon', message, slug } = req.body;
     if (!message || !slug) return res.status(400).json({ error: 'Falta mensagem ou slug.' });
     try {
+        // Verifica se é o dono do tenant
+        const isOwner = global.ownerSessions && global.ownerSessions[userId]?.slug === slug;
         const tenant = await Tenant.findOne({ slug });
         if (!tenant) return res.status(404).json({ error: "Tenant não encontrado." });
-        pushToHistory(userId, 'user', message);
-        const state = stateDetector(message); 
-        userMemory[userId] = memoryEngine(userMemory[userId] || {}, message, state);
-        saveLocalData();
-        const score = scoringEngine({ message, state: state.awareness, memory: userMemory[userId], history: userHistories[userId] });
-        const strategy = strategyEngine(state, score, userHistories[userId]);
-        const silenceDuration = silence(state.profile, state.awareness);
-        if (silenceDuration > 15000 && state.resistance) {
-            return res.json({ ok: true, reply: "Estou analisando sua situação..." });
-        }
         await new Promise(resolve => setTimeout(resolve, silenceDuration));
-        const systemPrompt = promptComposer({ userId, memory: userMemory[userId], state, strategy, score, context: tenant.trainingData, role: tenant.systemPromptBase });
+        const systemPrompt = promptComposer({ userId, memory: userMemory[userId], state, strategy, score, context: tenant.trainingData, role: tenant.systemPromptBase, isOwner, tenantName: tenant.name });
         const completion = await groq.chat.completions.create({
             model: 'llama-3.3-70b-versatile',
             messages: [{ role: 'system', content: systemPrompt }, ...userHistories[userId]],
