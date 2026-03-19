@@ -986,7 +986,7 @@ async function callLisaAPI(message) {
     body: JSON.stringify({
       userId:  API_CONFIG.userId,
       message: message,
-      slug:    getSlug(),
+     slug: window._ownerSlug || getSlug(),
     }),
   });
 
@@ -1014,7 +1014,7 @@ async function send() {
   el.value = ''; el.style.height = '';
   showTyping();
 
-  if (IS_ONBOARDING) {
+  if (IS_ONBOARDING && !window.IS_ONBOARDING_DONE) {
     try {
       const res = await fetch(API_CONFIG.baseUrl + '/onboarding', {
         method: 'POST',
@@ -1025,9 +1025,10 @@ async function send() {
       rmTyping();
       if (data.reply) appendMsg(data.reply, 'lisa');
       if (data._lastExtracted !== undefined) window._lastExtracted = data._lastExtracted;
-      if (data.step === 'complete' && data.link) {
-        setTimeout(() => showOnboardingSuccess(data.link, data.tenant), 1200);
-      }
+      if (data.step === 'complete') {
+  window.IS_ONBOARDING_DONE = true;
+  window._ownerSlug = data.tenant?.slug;
+}
     } catch (err) {
       rmTyping();
       appendMsg('⚠️ Erro de conexão. Tente novamente.', 'lisa');
