@@ -125,13 +125,62 @@ app.post('/onboarding', async (req, res) => {
       }
     }
 
-    session.data = detectOnboardingData(message, session.data);
-    const missing = getMissingFields(session.data);
-    const progress = Math.round(((4 - missing.length) / 4) * 100);
-    if (missing.length === 0) {
-      session.awaitingConfirmation = true;
-      return res.json({ ok: true, reply: generateSummary(session.data), step: 'awaiting_confirmation', progress: 100 });
-    }
+    // Extracção inteligente via Groq — entende qualquer forma de escrita
+try {
+  const extraction = await groq.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    messages: [{
+      role: 'system',
+      content: `Você é um extractor de dados de negócio. 
+Analise a mensagem e extraia informações de negócio.
+Responda APENAS em JSON válido sem markdown:
+{
+  "businessName": "nome do negócio ou null",
+  "product": "produto ou serviço ou null",
+  "price": "preço ou valor ou null",
+  "audience": "público-alvo ou null"
+}
+Regras:
+- Se não houver informação para um campo coloque null
+- Não invente dados que não estão na mensagem
+- businessName: nome da empresa/negócio/clínica/escritório
+- product: o que vende ou faz — serviço ou produto
+- price: qualquer menção de valor, preço, honorário
+- audience: para quem vende, público, pacientes, clientes`
+    }, {
+      role: 'user',
+      content: message
+    }],
+    temperature: 0
+  });
+
+  const raw = extraction?.choices?.[0]?.message?.content || '{}';
+  const clean = raw.replace(/```json|```/g, '').trim();
+  const extracted = JSON.parse(clean);
+
+  if (extracted.businessName && !session.data.businessName.extracted) {
+    session.data.businessName = { ...session.data.businessName, extracted: true, value: extracted.businessName };
+  }
+  if (extracted.product && !session.data.product.extracted) {
+    session.data.product = { ...session.data.product, extracted: true, value: extracted.product };
+  }
+  if (extracted.price && !session.data.price.extracted) {
+    session.data.price = { ...session.data.price, extracted: true, value: extracted.price };
+  }
+  if (extracted.audience && !session.data.audience.extracted) {
+    session.data.audience = { ...session.data.audience, extracted: true, value: extracted.audience };
+  }
+} catch(e) {
+  // Fallback para regex se Groq falhar
+  session.data = detectOnboardingData(message, session.data);
+}
+
+const missing = getMissingFields(session.data);
+const progress = Math.round(((4 - missing.length) / 4) * 100);
+if (missing.length === 0) {
+  session.awaitingConfirmation = true;
+  return res.json({ ok: true, reply: generateSummary(session.data), step: 'awaiting_confirmation', progress: 100 });
+}
     const confirmations = ['Anotado!','Perfeito!','Ótimo!','Entendi!'];
     const totalExtracted = Object.values(session.data).filter(f => f.extracted).length;
     const lastExtracted = req.body._lastExtracted ?? -1;
