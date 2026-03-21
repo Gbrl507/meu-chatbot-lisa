@@ -91,7 +91,36 @@ app.post('/onboarding', async (req, res) => {
         step: 'collecting',
         awaitingConfirmation: false
       };
-      return res.json({ ok: true, reply: `Oi! Sou a KIRA 👋\nVou configurar sua IA de vendas em menos de 5 minutos.\nQual é o seu nome?`, step: 'collecting', progress: 0 });
+      // Gera resposta natural via Groq
+const onboardingChat = await groq.chat.completions.create({
+  model: 'llama-3.3-70b-versatile',
+  messages: [{
+    role: 'system',
+    content: `Você é Kira — uma IA de vendas calorosa e brasileira.
+Está a configurar o negócio de um novo cliente.
+
+DADOS JÁ RECOLHIDOS:
+${JSON.stringify(session.data, null, 2)}
+
+CAMPOS QUE FALTAM: ${missing.join(', ')}
+
+MISSÃO: Conversar naturalmente para descobrir os campos em falta.
+→ Fala como brasileira — calorosa, directa, com gírias
+→ UMA pergunta de cada vez
+→ Aceita qualquer forma de resposta
+→ Nunca peças para repetir — adapta-te ao que disseram
+→ Se disseram o nome pessoal sem negócio — pergunta sobre o negócio de forma natural
+→ Exemplo: "Boa Luis! E o negócio? Como se chama sua empresa ou consultório?"`
+  }, 
+  ...session.history || [],
+  { role: 'user', content: message }],
+  temperature: 0.7
+});
+
+const reply = onboardingChat?.choices?.[0]?.message?.content;
+if (!session.history) session.history = [];
+session.history.push({ role: 'user', content: message });
+session.history.push({ role: 'assistant', content: reply });
     }
     const session = onboardingSessions[userId];
     if (session.awaitingConfirmation) {
@@ -186,18 +215,39 @@ if (missing.length === 0) {
     const lastExtracted = req.body._lastExtracted ?? -1;
     const sameAsBefore = totalExtracted === lastExtracted;
 
-    let reply;
-    if (sameAsBefore) {
-      const hints = {
-        businessName: "Hmm, não entendi bem 😅 Me diz só o nome da sua empresa — exemplo: 'Advocacia Silva' ou 'Clínica Estética Prime'. Qual é o nome do seu negócio?",
-        product: "Não captei! Me conta o que você vende — exemplo: 'vendo consultoria jurídica' ou 'faço limpeza de pele'. O que você vende?",
-        price: "Não entendi o valor 😅 Exemplo: 'cobro R$500 por sessão' ou 'pacotes a partir de R$2.000'. Qual é o seu preço?",
-        audience: "Me conta para quem você vende — exemplo: 'atendo empresários' ou 'meu público são mulheres de 30 a 50 anos'. Para quem você vende?"
-      };
-      reply = hints[missing[0]] || getNextQuestion(missing);
-    } else {
-      reply = (session.data.businessName.extracted || session.data.product.extracted ? confirmations[Math.floor(Math.random()*confirmations.length)] + ' ' : '') + getNextQuestion(missing);
-    }
+   // Kira responde naturalmente via Groq
+const onboardingReply = await groq.chat.completions.create({
+  model: 'llama-3.3-70b-versatile',
+  messages: [{
+    role: 'system',
+    content: `Você é Kira — IA de vendas calorosa e brasileira.
+Está configurando o negócio de um novo cliente.
+
+DADOS JÁ RECOLHIDOS:
+- Nome negócio: ${session.data.businessName.value || 'não informado ainda'}
+- Produto: ${session.data.product.value || 'não informado ainda'}
+- Preço: ${session.data.price.value || 'não informado ainda'}
+- Público: ${session.data.audience.value || 'não informado ainda'}
+
+CAMPO QUE PRECISA AGORA: ${missing[0]}
+
+MISSÃO: Responda de forma natural e calorosa.
+→ Fala como brasileira — calorosa, directa
+→ Se já extraiu algo — confirme brevemente
+→ Faça UMA pergunta para o próximo campo
+→ Aceite qualquer forma de resposta
+→ NUNCA peça para repetir
+→ Máximo 2 frases`
+  },
+  ...(session.history || []),
+  { role: 'user', content: message }],
+  temperature: 0.7
+});
+
+const reply = onboardingReply?.choices?.[0]?.message?.content || getNextQuestion(missing);
+if (!session.history) session.history = [];
+session.history.push({ role: 'user', content: message });
+session.history.push({ role: 'assistant', content: reply });
 
     return res.json({ ok: true, reply, step: 'collecting', progress, missing, _lastExtracted: totalExtracted });
   } catch (err) {
