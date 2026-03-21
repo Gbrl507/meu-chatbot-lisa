@@ -215,7 +215,7 @@ if (missing.length === 0) {
     const lastExtracted = req.body._lastExtracted ?? -1;
     const sameAsBefore = totalExtracted === lastExtracted;
 
-   // Kira responde naturalmente via Groq
+  // Kira responde naturalmente via Groq
 const onboardingReply = await groq.chat.completions.create({
   model: 'llama-3.3-70b-versatile',
   messages: [{
@@ -232,8 +232,11 @@ DADOS JÁ RECOLHIDOS:
 CAMPO QUE PRECISA AGORA: ${missing[0]}
 
 MISSÃO: Responda de forma natural e calorosa.
-→ Fala como brasileira — calorosa, directa
-→ Se já extraiu algo — confirme brevemente
+→ Fala como brasileira — calorosa, directa, profissional
+→ Termos carinhosos APENAS quando o cliente demonstrar emoção ou conquista
+→ No contexto de negócios — usa "você" e seja profissional
+→ NUNCA use "meu amor", "querido", "mozão" no início da conversa
+→ Se já extraiu algo — confirme brevemente com entusiasmo
 → Faça UMA pergunta para o próximo campo
 → Aceite qualquer forma de resposta
 → NUNCA peça para repetir
@@ -241,9 +244,8 @@ MISSÃO: Responda de forma natural e calorosa.
   },
   ...(session.history || []),
   { role: 'user', content: message }],
-  temperature: 0.7
+  temperature: 0.3
 });
-
 const reply = onboardingReply?.choices?.[0]?.message?.content || getNextQuestion(missing);
 if (!session.history) session.history = [];
 session.history.push({ role: 'user', content: message });
