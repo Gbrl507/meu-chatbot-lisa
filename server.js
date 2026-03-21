@@ -116,7 +116,7 @@ app.post('/onboarding', async (req, res) => {
           isOwner: true
         };
         delete onboardingSessions[userId];
-        return res.json({ ok: true, reply: `✅ Sua Kira está configurada!\n\n🔗 Link dos seus clientes:\nhttps://meu-chatbot-lisa.onrender.com/?tenant=${slug}\n\nAgora pode falar comigo normalmente! Me pergunta o que quiser sobre o seu negócio. 😊`, step: 'complete', tenant: { slug, name: data.businessName.value } });
+      return res.json({ ok: true, reply: `✅ Prontinho! 🚀\n\nEaê! Tudo configurado — sou a Kira e já sei tudo sobre o ${data.businessName.value}!\n\n🔗 Link dos seus clientes:\nhttps://meu-chatbot-lisa.onrender.com/?tenant=${slug}\n\nAí, como posso te chamar? 😊`, step: 'complete', tenant: { slug, name: data.businessName.value } });
       } else if (denied) {
         session.awaitingConfirmation = false;
         return res.json({ ok: true, reply: "Tudo bem! O que precisa corrigir?", step: 'collecting' });
