@@ -27,16 +27,17 @@ function detectOnboardingData(message, currentData) {
         break;
       }
     }
-   if (!matched && message.trim().length >= 3) {
-  const words = message.trim().split(/\s+/);
-  const hasRealWord = words.some(w => w.length >= 3 && !/^[^aeiouáéíóuàâêôãõ]{4,}$/i.test(w));
-  if (hasRealWord) {
-    let cleanName = message.trim()
-      .replace(/^(o nome do meu neg[oó]cio [eé]|meu neg[oó]cio [eé]|minha empresa [eé]|me chamo|sou a empresa|eu sou)\s*/gi, '')
-      .trim();
-    data.businessName = { ...data.businessName, extracted: true, value: cleanName || message.trim() };
+    if (!matched && message.trim().length >= 3) {
+      const words = message.trim().split(/\s+/);
+      const hasRealWord = words.some(w => w.length >= 3 && !/^[^aeiouáéíóuàâêôãõ]{4,}$/i.test(w));
+      if (hasRealWord) {
+        let cleanName = message.trim()
+          .replace(/^(o nome do meu neg[oó]cio [eé]|meu neg[oó]cio [eé]|minha empresa [eé]|me chamo|sou a empresa|eu sou)\s*/gi, '')
+          .trim();
+        data.businessName = { ...data.businessName, extracted: true, value: cleanName || message.trim() };
+      }
+    }
   }
-}
 
   // Produto/serviço
   if (!data.product.extracted) {
