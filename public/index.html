@@ -963,15 +963,16 @@ const API_CONFIG = {
  slug: new URLSearchParams(window.location.search).get('tenant') || 'estetica-prime',
   // 👤 ID do usuário — gerado uma vez por sessão
   // O servidor usa este ID para memória, histórico e scoring
-  userId: (function() {
-    let id = localStorage.getItem('lisa_user_id');
-    if (!id) {
-      id = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
-   localStorage.setItem('lisa_user_id', id);
-    }
-    return id;
-  })(),
-};
+ userId: (function() {
+  const obId = localStorage.getItem('kira_ob_id');
+  if (obId) return 'ob_' + obId;
+  let id = localStorage.getItem('lisa_user_id');
+  if (!id) {
+    id = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
+    localStorage.setItem('lisa_user_id', id);
+  }
+  return id;
+})(),
 
 // Slug ativo baseado no tema atual
 function getSlug() {
