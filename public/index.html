@@ -988,7 +988,7 @@ async function callLisaAPI(message) {
     body: JSON.stringify({
       userId:  API_CONFIG.userId,
       message: message,
-     slug: window._ownerSlug || getSlug(),
+     slug: window._ownerSlug || localStorage.getItem('kira_owner_slug') || getSlug(),
     }),
   });
 
@@ -1027,9 +1027,11 @@ async function send() {
       rmTyping();
       if (data.reply) appendMsg(data.reply, 'lisa');
       if (data._lastExtracted !== undefined) window._lastExtracted = data._lastExtracted;
-      if (data.step === 'complete') {
+    if (data.step === 'complete') {
   window.IS_ONBOARDING_DONE = true;
   window._ownerSlug = data.tenant?.slug;
+  localStorage.setItem('kira_owner_slug', data.tenant?.slug);
+  localStorage.setItem('kira_is_owner', 'true');
 }
     } catch (err) {
       rmTyping();
