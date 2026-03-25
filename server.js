@@ -15,6 +15,7 @@ const silence = require('./core/silence.js');
 const strategyEngine = require('./core/strategyEngine.js');
 const scrapeWebsite = require('./core/webScraper.js');
 const Tenant = require('./models/Tenant');
+const Conversation = require('./models/Conversation');
 const {
   ONBOARDING_FIELDS,
   detectOnboardingData,
@@ -81,7 +82,6 @@ app.post('/onboarding', async (req, res) => {
   const { userId = 'anon', message } = req.body;
   if (!message) return res.status(400).json({ error: 'Falta mensagem.' });
   try {
-    // Ignora mensagem de init — força nova sessão
     if (message === '__init__') {
       delete onboardingSessions[userId];
     }
@@ -91,38 +91,11 @@ app.post('/onboarding', async (req, res) => {
         step: 'collecting',
         awaitingConfirmation: false
       };
-      // Gera resposta natural via Groq
-const onboardingChat = await groq.chat.completions.create({
-  model: 'llama-3.3-70b-versatile',
-  messages: [{
-    role: 'system',
-    content: `Você é Kira — uma IA de vendas calorosa e brasileira.
-Está a configurar o negócio de um novo cliente.
-
-DADOS JÁ RECOLHIDOS:
-${JSON.stringify(session.data, null, 2)}
-
-CAMPOS QUE FALTAM: ${missing.join(', ')}
-
-MISSÃO: Conversar naturalmente para descobrir os campos em falta.
-→ Fala como brasileira — calorosa, directa, com gírias
-→ UMA pergunta de cada vez
-→ Aceita qualquer forma de resposta
-→ Nunca peças para repetir — adapta-te ao que disseram
-→ Se disseram o nome pessoal sem negócio — pergunta sobre o negócio de forma natural
-→ Exemplo: "Boa Luis! E o negócio? Como se chama sua empresa ou consultório?"`
-  }, 
-  ...session.history || [],
-  { role: 'user', content: message }],
-  temperature: 0.7
-});
-
-const reply = onboardingChat?.choices?.[0]?.message?.content;
-if (!session.history) session.history = [];
-session.history.push({ role: 'user', content: message });
-session.history.push({ role: 'assistant', content: reply });
+      return res.json({ ok: true, reply: `Oi! Sou a KIRA 👋\nVou configurar sua IA de vendas em menos de 5 minutos.\nQual é o nome do seu negócio?`, step: 'collecting', progress: 0 });
     }
+
     const session = onboardingSessions[userId];
+
     if (session.awaitingConfirmation) {
       const msg = message.toLowerCase();
       const confirmed = ['sim','yes','correto','certo','perfeito','isso','exato','ok','pode','confirmo'].some(w => msg.includes(w));
@@ -139,13 +112,9 @@ session.history.push({ role: 'assistant', content: reply });
         });
         await novoTenant.save();
         if (!global.ownerSessions) global.ownerSessions = {};
-        global.ownerSessions[userId] = {
-          slug,
-          name: data.businessName.value,
-          isOwner: true
-        };
+        global.ownerSessions[userId] = { slug, name: data.businessName.value, isOwner: true };
         delete onboardingSessions[userId];
-      return res.json({ ok: true, reply: `✅ Prontinho! 🚀\n\nEaê! Tudo configurado — sou a Kira e já sei tudo sobre o ${data.businessName.value}!\n\n🔗 Link dos seus clientes:\nhttps://meu-chatbot-lisa.onrender.com/?tenant=${slug}\n\nAí, como posso te chamar? 😊`, step: 'complete', tenant: { slug, name: data.businessName.value } });
+        return res.json({ ok: true, reply: `✅ Prontinho! 🚀\n\nEaê! Tudo configurado — sou a Kira e já sei tudo sobre o ${data.businessName.value}!\n\n🔗 Link dos seus clientes:\nhttps://meu-chatbot-lisa.onrender.com/?tenant=${slug}\n\nAí, como posso te chamar? 😊`, step: 'complete', tenant: { slug, name: data.businessName.value } });
       } else if (denied) {
         session.awaitingConfirmation = false;
         return res.json({ ok: true, reply: "Tudo bem! O que precisa corrigir?", step: 'collecting' });
@@ -154,13 +123,13 @@ session.history.push({ role: 'assistant', content: reply });
       }
     }
 
-    // Extracção inteligente via Groq — entende qualquer forma de escrita
-try {
-  const extraction = await groq.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
-    messages: [{
-      role: 'system',
-      content: `Você é um extractor de dados de negócio. 
+    // Extracção inteligente via Groq
+    try {
+      const extraction = await groq.chat.completions.create({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{
+          role: 'system',
+          content: `Você é um extractor de dados de negócio. 
 Analise a mensagem e extraia informações de negócio.
 Responda APENAS em JSON válido sem markdown:
 {
@@ -176,51 +145,50 @@ Regras:
 - product: o que vende ou faz — serviço ou produto
 - price: qualquer menção de valor, preço, honorário
 - audience: para quem vende, público, pacientes, clientes`
-    }, {
-      role: 'user',
-      content: message
-    }],
-    temperature: 0
-  });
+        }, {
+          role: 'user',
+          content: message
+        }],
+        temperature: 0
+      });
 
-  const raw = extraction?.choices?.[0]?.message?.content || '{}';
-  const clean = raw.replace(/```json|```/g, '').trim();
-  const extracted = JSON.parse(clean);
+      const raw = extraction?.choices?.[0]?.message?.content || '{}';
+      const clean = raw.replace(/```json|```/g, '').trim();
+      const extracted = JSON.parse(clean);
 
-  if (extracted.businessName && !session.data.businessName.extracted) {
-    session.data.businessName = { ...session.data.businessName, extracted: true, value: extracted.businessName };
-  }
-  if (extracted.product && !session.data.product.extracted) {
-    session.data.product = { ...session.data.product, extracted: true, value: extracted.product };
-  }
-  if (extracted.price && !session.data.price.extracted) {
-    session.data.price = { ...session.data.price, extracted: true, value: extracted.price };
-  }
-  if (extracted.audience && !session.data.audience.extracted) {
-    session.data.audience = { ...session.data.audience, extracted: true, value: extracted.audience };
-  }
-} catch(e) {
-  // Fallback para regex se Groq falhar
-  session.data = detectOnboardingData(message, session.data);
-}
+      if (extracted.businessName && !session.data.businessName.extracted) {
+        session.data.businessName = { ...session.data.businessName, extracted: true, value: extracted.businessName };
+      }
+      if (extracted.product && !session.data.product.extracted) {
+        session.data.product = { ...session.data.product, extracted: true, value: extracted.product };
+      }
+      if (extracted.price && !session.data.price.extracted) {
+        session.data.price = { ...session.data.price, extracted: true, value: extracted.price };
+      }
+      if (extracted.audience && !session.data.audience.extracted) {
+        session.data.audience = { ...session.data.audience, extracted: true, value: extracted.audience };
+      }
+    } catch(e) {
+      session.data = detectOnboardingData(message, session.data);
+    }
 
-const missing = getMissingFields(session.data);
-const progress = Math.round(((4 - missing.length) / 4) * 100);
-if (missing.length === 0) {
-  session.awaitingConfirmation = true;
-  return res.json({ ok: true, reply: generateSummary(session.data), step: 'awaiting_confirmation', progress: 100 });
-}
-    const confirmations = ['Anotado!','Perfeito!','Ótimo!','Entendi!'];
+    const missing = getMissingFields(session.data);
+    const progress = Math.round(((4 - missing.length) / 4) * 100);
+
+    if (missing.length === 0) {
+      session.awaitingConfirmation = true;
+      return res.json({ ok: true, reply: generateSummary(session.data), step: 'awaiting_confirmation', progress: 100 });
+    }
+
     const totalExtracted = Object.values(session.data).filter(f => f.extracted).length;
     const lastExtracted = req.body._lastExtracted ?? -1;
-    const sameAsBefore = totalExtracted === lastExtracted;
 
-  // Kira responde naturalmente via Groq
-const onboardingReply = await groq.chat.completions.create({
-  model: 'llama-3.3-70b-versatile',
-  messages: [{
-    role: 'system',
-    content: `Você é Kira — IA de vendas calorosa e brasileira.
+    // Kira responde naturalmente via Groq
+    const onboardingReply = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{
+        role: 'system',
+        content: `Você é Kira — IA de vendas calorosa e brasileira.
 Está configurando o negócio de um novo cliente.
 
 DADOS JÁ RECOLHIDOS:
@@ -241,15 +209,16 @@ MISSÃO: Responda de forma natural e calorosa.
 → Aceite qualquer forma de resposta
 → NUNCA peça para repetir
 → Máximo 2 frases`
-  },
-  ...(session.history || []),
-  { role: 'user', content: message }],
-  temperature: 0.3
-});
-const reply = onboardingReply?.choices?.[0]?.message?.content || getNextQuestion(missing);
-if (!session.history) session.history = [];
-session.history.push({ role: 'user', content: message });
-session.history.push({ role: 'assistant', content: reply });
+      },
+      ...(session.history || []),
+      { role: 'user', content: message }],
+      temperature: 0.3
+    });
+
+    const reply = onboardingReply?.choices?.[0]?.message?.content || getNextQuestion(missing);
+    if (!session.history) session.history = [];
+    session.history.push({ role: 'user', content: message });
+    session.history.push({ role: 'assistant', content: reply });
 
     return res.json({ ok: true, reply, step: 'collecting', progress, missing, _lastExtracted: totalExtracted });
   } catch (err) {
@@ -276,15 +245,67 @@ app.get('/admin/tenants', async (req, res) => {
   } catch (err) { res.status(500).json({ error: "Erro ao buscar clientes." }); }
 });
 
+// ─── DASHBOARD STATS ──────────────────────────────────────────────────────────
+app.get('/dashboard/stats', async (req, res) => {
+  const { slug } = req.query;
+  if (!slug) return res.status(400).json({ error: 'Falta slug.' });
+  try {
+    const conversations = await Conversation.find({ slug });
+    const totalConversas = conversations.length;
+    const leadsQualificados = conversations.filter(c => c.score >= 40).length;
+    const vendasFechadas = conversations.filter(c => c.converted).length;
+    const scoreMedio = totalConversas > 0 
+      ? Math.round(conversations.reduce((acc, c) => acc + (c.score || 0), 0) / totalConversas)
+      : 0;
+    const receita = vendasFechadas * 497;
+    const taxa = totalConversas > 0 ? Math.round((leadsQualificados / totalConversas) * 100) : 0;
+
+    const leads = conversations
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10)
+      .map(c => ({
+        name: c.leadName || 'Lead',
+        score: c.score || 0,
+        msg: c.messages?.slice(-1)[0]?.content?.substring(0, 60) + '...' || '',
+        status: c.status || 'cold',
+        messages: c.messages?.slice(-6) || []
+      }));
+
+    const timeline = conversations
+      .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+      .slice(0, 5)
+      .map(c => {
+        const diff = Math.round((Date.now() - new Date(c.updatedAt)) / 60000);
+        const time = diff < 60 ? `${diff}min` : `${Math.round(diff/60)}h`;
+        return {
+          ico: c.status === 'hot' ? '🔥' : c.status === 'warm' ? '💙' : '❄️',
+          name: c.leadName || 'Lead',
+          meta: `Score ${c.score} · ${c.status}`,
+          time
+        };
+      });
+
+    res.json({
+      totalConversas, leadsQualificados, vendasFechadas,
+      scoreMedio, receita, taxa,
+      interessados: conversations.filter(c => c.score >= 60).length,
+      leads, timeline
+    });
+  } catch (err) {
+    console.error('❌ Dashboard stats:', err);
+    res.status(500).json({ error: 'Erro ao buscar stats.' });
+  }
+});
+
 // ─── CHAT ─────────────────────────────────────────────────────────────────────
 app.post('/chat', async (req, res) => {
   const { userId = 'anon', message, slug } = req.body;
   if (!message || !slug) return res.status(400).json({ error: 'Falta mensagem ou slug.' });
   try {
-        const tenant = await Tenant.findOne({ slug });
-const isOwner = tenant && tenant.ownerUserId === userId;
-  
+    const tenant = await Tenant.findOne({ slug });
+    const isOwner = tenant && tenant.ownerUserId === userId;
     if (!tenant) return res.status(404).json({ error: "Tenant não encontrado." });
+
     pushToHistory(userId, 'user', message);
     const state = stateDetector(message);
     userMemory[userId] = memoryEngine(userMemory[userId] || {}, message, state);
@@ -292,18 +313,49 @@ const isOwner = tenant && tenant.ownerUserId === userId;
     const score = scoringEngine({ message, state: state.awareness, memory: userMemory[userId], history: userHistories[userId] });
     const strategy = strategyEngine(state, score, userHistories[userId]);
     const silenceDuration = silence(state.profile, state.awareness);
+
     if (silenceDuration > 15000 && state.resistance) {
       return res.json({ ok: true, reply: "Estou analisando sua situação..." });
     }
+
     await new Promise(resolve => setTimeout(resolve, silenceDuration));
+
     const systemPrompt = promptComposer({ userId, memory: userMemory[userId], state, strategy, score, context: tenant.trainingData, role: tenant.systemPromptBase, isOwner, tenantName: tenant.name });
+
     const completion = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [{ role: 'system', content: systemPrompt }, ...userHistories[userId]],
       temperature: 0.5
     });
+
     const reply = completion?.choices?.[0]?.message?.content;
     pushToHistory(userId, 'assistant', reply);
+
+    // Guardar conversa no MongoDB — Kira aprende para sempre
+    if (!isOwner) {
+      try {
+        const leadName = userMemory[userId]?.name || 'Lead';
+        await Conversation.findOneAndUpdate(
+          { slug, userId },
+          {
+            $push: { 
+              messages: [
+                { role: 'user', content: message },
+                { role: 'assistant', content: reply }
+              ]
+            },
+            $set: { 
+              score,
+              leadName,
+              status: score >= 70 ? 'hot' : score >= 40 ? 'warm' : 'cold',
+              updatedAt: new Date()
+            }
+          },
+          { upsert: true, new: true }
+        );
+      } catch(e) { console.error('❌ Conversation save:', e); }
+    }
+
     res.json({ ok: true, reply });
   } catch (err) {
     console.error('❌ Chat:', err);

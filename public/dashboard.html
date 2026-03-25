@@ -1,42 +1,18 @@
+Dashboard kira v2 · HTML
+Copiar
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lisa — Universal AI Sales Dashboard</title>
+<title>Kira IA — Dashboard</title>
 <style>
 :root {
-  /* ── FONT STACK (zero external dependencies) ── */
   --font-display: 'SF Pro Display', 'Helvetica Neue', 'Arial Black', sans-serif;
   --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', 'Courier New', monospace;
   --font-body: 'SF Pro Text', 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
-
-  /* Default: Luxury/Imóveis */
-  --accent1: #C9A84C;
-  --accent2: #8B6914;
-  --accent3: #F5D07A;
-  --glow: rgba(201,168,76,0.35);
-  --glow-soft: rgba(201,168,76,0.12);
-  --ring-color: rgba(201,168,76,0.5);
-  --ring-core: rgba(201,168,76,0.8);
-  --btn-bg: linear-gradient(135deg,#C9A84C,#8B6914);
-  --wa-color: #25D366;
-  --card-bg: #0c1018;
-  --shell-bg: #080c12;
-  --nav-bg: #0a0e16;
-  --border: rgba(255,255,255,0.06);
-  --border-accent: rgba(201,168,76,0.2);
-  --text: #fff;
-  --text-dim: rgba(255,255,255,0.42);
-  --text-mid: rgba(255,255,255,0.7);
-  --dot-color: #C9A84C;
-  --line-color: #C9A84C;
-  --fill-grad-a: rgba(201,168,76,0.35);
-  --fill-grad-b: rgba(201,168,76,0);
-  transition: --accent1 0.6s, --accent2 0.6s;
-}
-
-[data-theme="tech"] {
+ 
   --accent1: #00FFCC;
   --accent2: #0088FF;
   --accent3: #66FFEE;
@@ -45,31 +21,23 @@
   --ring-color: rgba(0,255,204,0.55);
   --ring-core: rgba(0,255,204,0.9);
   --btn-bg: linear-gradient(135deg,#00FFCC,#0088FF);
+  --wa-color: #25D366;
+  --card-bg: #0c1018;
+  --shell-bg: #080c12;
+  --nav-bg: #0a0e16;
+  --border: rgba(255,255,255,0.06);
   --border-accent: rgba(0,255,204,0.2);
+  --text: #fff;
+  --text-dim: rgba(255,255,255,0.42);
+  --text-mid: rgba(255,255,255,0.7);
   --dot-color: #00FFCC;
   --line-color: #00FFCC;
   --fill-grad-a: rgba(0,255,204,0.3);
   --fill-grad-b: rgba(0,255,204,0);
 }
-
-[data-theme="retail"] {
-  --accent1: #FF3D6B;
-  --accent2: #FF8C00;
-  --accent3: #FFB347;
-  --glow: rgba(255,61,107,0.38);
-  --glow-soft: rgba(255,61,107,0.12);
-  --ring-color: rgba(255,61,107,0.55);
-  --ring-core: rgba(255,130,0,0.9);
-  --btn-bg: linear-gradient(135deg,#FF3D6B,#FF8C00);
-  --border-accent: rgba(255,61,107,0.22);
-  --dot-color: #FF3D6B;
-  --line-color: #FF3D6B;
-  --fill-grad-a: rgba(255,61,107,0.32);
-  --fill-grad-b: rgba(255,140,0,0);
-}
-
+ 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
 body {
   font-family: var(--font-body);
   background: var(--shell-bg);
@@ -77,14 +45,14 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
-
+ 
 .shell {
   background: var(--shell-bg);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
-
+ 
 /* ── TOPNAV ── */
 .topnav {
   display: flex;
@@ -95,7 +63,7 @@ body {
   background: var(--nav-bg);
   position: sticky; top: 0; z-index: 50;
 }
-
+ 
 .nav-logo {
   display: flex;
   align-items: center;
@@ -104,7 +72,11 @@ body {
   font-size: 19px;
   font-weight: 800;
   letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #00FFCC, #0088FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
+ 
 .nav-logo-icon {
   width: 32px; height: 32px;
   border-radius: 8px;
@@ -112,43 +84,21 @@ body {
   display: flex; align-items: center; justify-content: center;
   font-size: 15px;
   box-shadow: 0 0 18px var(--glow);
-  transition: background 0.6s, box-shadow 0.6s;
 }
-
-.nav-center {
+ 
+.tenant-badge {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
+  gap: 8px;
+  background: rgba(0,255,204,0.06);
+  border: 1px solid var(--border-accent);
   border-radius: 100px;
-  padding: 4px;
-}
-
-.niche-pill {
   padding: 6px 14px;
-  border-radius: 100px;
   font-size: 12px;
-  font-weight: 600;
-  color: var(--text-dim);
-  cursor: pointer;
-  transition: all 0.3s;
-  border: none;
-  background: transparent;
-  font-family: var(--font-body);
-  display: flex; align-items: center; gap: 6px;
-  white-space: nowrap;
+  color: var(--accent1);
+  font-family: var(--font-mono);
 }
-.niche-pill.active {
-  background: var(--btn-bg);
-  color: #fff;
-  box-shadow: 0 0 18px var(--glow);
-}
-.niche-pill:hover:not(.active) {
-  color: var(--text);
-  background: rgba(255,255,255,0.06);
-}
-
+ 
 .nav-right { display: flex; align-items: center; gap: 10px; }
 .nav-icon-btn {
   width: 33px; height: 33px;
@@ -160,8 +110,7 @@ body {
   transition: all 0.2s;
 }
 .nav-icon-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); }
-
-/* ── WA BUTTON ── */
+ 
 .wa-btn {
   display: flex;
   align-items: center;
@@ -190,11 +139,10 @@ body {
   animation: blink 2s ease-in-out infinite;
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
-
+ 
 /* ── MAIN ── */
 .main { padding: 18px 26px; flex: 1; }
-
-/* ── TOP STRIP: title + CTA ── */
+ 
 .title-row {
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 16px;
@@ -211,11 +159,10 @@ body {
   border-radius: 100px; padding: 3px 10px;
   font-size: 10px; font-weight: 600; color: var(--accent1);
   margin-left: 10px;
-  transition: all 0.6s;
   animation: badge-pulse 2.5s ease-in-out infinite;
 }
 @keyframes badge-pulse { 0%,100%{box-shadow:0 0 0 0 var(--glow)} 50%{box-shadow:0 0 12px 2px var(--glow-soft)} }
-
+ 
 /* ── CARDS ── */
 .card {
   background: var(--card-bg);
@@ -223,7 +170,7 @@ body {
   border-radius: 18px;
   padding: 18px 20px;
   position: relative; overflow: hidden;
-  transition: border-color 0.25s, transform 0.18s, box-shadow 0.18s, background 0.6s;
+  transition: border-color 0.25s, transform 0.18s, box-shadow 0.18s;
   will-change: transform;
   animation: fin 0.45s ease both;
 }
@@ -237,7 +184,7 @@ body {
   opacity: 0; transition: opacity 0.3s; z-index: 0;
 }
 .card:hover .card-glow { opacity: 1; }
-
+ 
 .card-header {
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 12px; position: relative; z-index: 2;
@@ -255,8 +202,8 @@ body {
   font-size: 11px; color: var(--text-dim); cursor: pointer; transition: all 0.2s;
 }
 .card-arrow:hover { background: var(--glow-soft); color: var(--accent1); border-color: var(--border-accent); }
-
-/* ── MAIN GRID ── */
+ 
+/* ── TOP GRID ── */
 .top-grid {
   display: grid;
   grid-template-columns: 1fr 1.85fr 1fr;
@@ -264,12 +211,12 @@ body {
   height: 370px;
   margin-bottom: 14px;
 }
-
+ 
 /* ── MARKET PULSE ── */
 .market-pulse { display: flex; flex-direction: column; }
 .chart-wrap { flex: 1; position: relative; min-height: 0; }
 .chart-wrap canvas { position: absolute; inset: 0; width: 100%!important; height: 100%!important; }
-
+ 
 .mini-stats {
   display: flex; gap: 14px; margin-top: 10px;
   position: relative; z-index: 2;
@@ -278,20 +225,19 @@ body {
 .mini-stat-val {
   font-family: var(--font-mono);
   font-size: 14px; font-weight: 700; color: var(--accent1);
-  transition: color 0.6s;
 }
 .mini-stat-lbl { font-size: 9px; color: var(--text-dim); margin-top: 1px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-/* ── DROPZONE / CORE ── */
+ 
+/* ── CORE / RINGS ── */
 .dropzone {
   background: #060a12;
   border: 2px solid var(--border-accent);
   cursor: pointer;
   display: flex; flex-direction: column;
-  transition: border-color 0.3s, box-shadow 0.3s, background 0.6s;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 .dropzone:hover { border-color: var(--ring-color); box-shadow: 0 0 60px var(--glow-soft); }
-
+ 
 .rings-wrap {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
@@ -299,14 +245,11 @@ body {
 }
 .ring-bg {
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse 80% 70% at 50% 56%,
-    rgba(0,20,50,0.7) 0%, transparent 75%);
-  transition: background 0.6s;
+  background: radial-gradient(ellipse 80% 70% at 50% 56%, rgba(0,20,50,0.7) 0%, transparent 75%);
 }
 .ring {
   position: absolute; border-radius: 50%;
   border-color: var(--ring-color) !important;
-  transition: border-color 0.6s;
 }
 .ring-1 { width:500px;height:370px; border:1px solid; opacity:0.12; animation:rot1 14s linear infinite; }
 .ring-2 { width:418px;height:305px; border:1.5px solid; opacity:0.18; animation:rot1 10s linear infinite reverse; }
@@ -318,76 +261,94 @@ body {
   width:56px; height:42px; border-radius:50%;
   background: radial-gradient(ellipse at center, var(--ring-core) 0%, var(--glow-soft) 50%, transparent 80%);
   animation: core-pulse 2s ease-in-out infinite;
-  transition: background 0.6s;
 }
 @keyframes rot1 { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
 @keyframes core-pulse { 0%,100%{transform:scale(1);opacity:0.7} 50%{transform:scale(1.35);opacity:1} }
-
+ 
 .dz-content {
   position: relative; z-index: 5; flex: 1;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   gap: 10px; padding: 20px;
 }
-.dz-icon {
-  width: 50px; height: 58px;
-  background: rgba(255,255,255,0.06);
+ 
+/* ── LEADS AO VIVO (substitui copy generator) ── */
+.leads-panel {
+  background: var(--card-bg);
   border: 1px solid var(--border-accent);
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px;
-  box-shadow: 0 0 20px var(--glow-soft);
-  position: relative;
-  transition: border-color 0.6s, box-shadow 0.6s;
+  border-radius: 18px;
+  overflow: hidden;
+  animation: fin 0.45s 0.2s ease both;
+  display: flex; flex-direction: column;
 }
-.dz-icon::after { content:''; position:absolute; top:0; right:0; width:14px; height:14px; background:rgba(255,255,255,0.1); border-radius:0 10px 0 10px; }
-.dz-label { font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--text-mid); }
-.dz-hint { font-size: 11px; color: var(--text-dim); text-align: center; line-height: 1.6; }
-.dz-cta {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 18px;
+.leads-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 14px 18px 0;
+}
+.leads-tabs {
+  display:flex; gap:3px;
+  padding: 8px 18px 0;
+}
+.leads-tab {
+  padding: 5px 12px; border-radius:100px; font-size:11px; font-weight:600;
+  cursor:pointer; border:none; font-family:var(--font-body);
+  background: transparent; color: var(--text-dim); transition: all 0.2s;
+}
+.leads-tab.active { background:var(--glow-soft); color:var(--accent1); border:1px solid var(--border-accent); }
+.leads-tab:hover:not(.active) { background:rgba(255,255,255,0.05); color:var(--text-mid); }
+ 
+.leads-list {
+  padding: 8px 18px 16px;
+  flex: 1;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+  min-height: 120px;
+}
+ 
+.lead-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.lead-item:hover { border-color: var(--border-accent); background: rgba(0,255,204,0.02); }
+.lead-item.hot { border-color: rgba(0,255,136,0.25); background: rgba(0,255,136,0.03); }
+.lead-item.warm { border-color: rgba(0,136,255,0.2); }
+.lead-item.cold { border-color: var(--border); }
+ 
+.lead-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
   background: var(--glow-soft);
   border: 1px solid var(--border-accent);
-  border-radius: 100px;
-  font-size: 11px; font-weight: 600; color: var(--accent1);
-  cursor: pointer; transition: all 0.3s;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
 }
-.dz-cta:hover { background: var(--glow); }
-
-/* Processing overlay */
-.proc-overlay {
-  display: none; position: relative; z-index: 5; flex: 1;
-  flex-direction: column; align-items: center; justify-content: center;
-  gap: 12px; padding: 20px;
+.lead-info { flex: 1; }
+.lead-name { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.lead-msg { font-size: 10px; color: var(--text-dim); margin-bottom: 6px; }
+.lead-actions { display: flex; gap: 5px; }
+.lead-btn {
+  padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 600;
+  cursor: pointer; border: none; font-family: var(--font-body); transition: all 0.2s;
 }
-.dropzone.processing .dz-content { display: none; }
-.dropzone.processing .proc-overlay { display: flex; }
-
-.proc-title {
-  font-size: 10px; font-weight: 700; color: var(--accent1);
-  letter-spacing: 2px; text-transform: uppercase;
-  transition: color 0.6s;
-}
-.proc-pct {
+.lead-btn-kira { background: var(--glow-soft); color: var(--accent1); border: 1px solid var(--border-accent); }
+.lead-btn-kira:hover { background: var(--glow); }
+.lead-btn-enter { background: rgba(123,0,255,0.1); color: #AA44FF; border: 1px solid rgba(123,0,255,0.2); }
+.lead-btn-enter:hover { background: rgba(123,0,255,0.2); }
+ 
+.lead-score {
   font-family: var(--font-mono);
-  font-size: 42px; font-weight: 700;
-  color: #fff;
-  text-shadow: 0 0 24px var(--glow);
-  transition: text-shadow 0.6s;
+  font-size: 11px; font-weight: 700;
+  padding: 3px 7px; border-radius: 6px; flex-shrink: 0;
 }
-.proc-bars { width: 200px; display:flex; flex-direction:column; gap:8px; }
-.pb-row { display:flex; align-items:center; gap:10px; }
-.pb-name { font-size:10px; color:var(--text-dim); width:72px; }
-.pb-track { flex:1; height:3px; background:rgba(255,255,255,0.06); border-radius:100px; overflow:hidden; }
-.pb-fill {
-  height:100%;
-  background: var(--btn-bg);
-  border-radius:100px;
-  animation:bar-anim 1.8s ease-in-out infinite;
-  transition: background 0.6s;
-}
-@keyframes bar-anim { 0%{transform:scaleX(0.15);transform-origin:left;opacity:0.6} 50%{transform:scaleX(0.9);opacity:1} 100%{transform:scaleX(0.15);opacity:0.6} }
-
+.score-hot { background: rgba(0,255,136,0.15); color: #00FF88; }
+.score-warm { background: rgba(0,136,255,0.15); color: var(--accent2); }
+.score-cold { background: rgba(107,107,138,0.15); color: #6B6B8A; }
+ 
 /* ── QR ── */
 .qr-card { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
 .qr-wrap { position:relative; }
@@ -402,7 +363,7 @@ body {
 .qr-box { width:148px; height:148px; background:#fff; border-radius:10px; padding:6px; position:relative; z-index:2; }
 .qr-caption { text-align:center; font-size:11px; color:var(--text-dim); line-height:1.5; }
 .qr-caption strong { display:block; color:var(--text-mid); font-weight:600; margin-bottom:2px; }
-
+ 
 /* ── SECOND GRID ── */
 .second-grid {
   display: grid;
@@ -410,79 +371,44 @@ body {
   gap: 14px;
   margin-bottom: 14px;
 }
-
+ 
 /* AI Insights */
 .wave-wrap { height:78px; position:relative; }
 .wave-wrap canvas { position:absolute; inset:0; width:100%!important; height:100%!important; }
 .progress-section { margin-top: 14px; }
 .prog-row { display:flex; justify-content:space-between; font-size:11px; color:var(--text-dim); margin-bottom:7px; }
-.prog-row strong { color:var(--accent1); font-weight:700; transition: color 0.6s; }
+.prog-row strong { color:var(--accent1); font-weight:700; }
 .prog-track { height:5px; background:rgba(255,255,255,0.06); border-radius:100px; overflow:hidden; }
-.prog-fill { height:100%; background:var(--btn-bg); border-radius:100px; animation: fill-grow 1.5s ease forwards; transition: background 0.6s; }
+.prog-fill { height:100%; background:var(--btn-bg); border-radius:100px; animation: fill-grow 1.5s ease forwards; }
 @keyframes fill-grow { from{width:0} to{width:87%} }
-
-/* ── COPY GENERATOR ── */
-.copy-panel {
-  background: var(--card-bg);
-  border: 1px solid var(--border-accent);
-  border-radius: 18px;
-  overflow: hidden;
-  animation: fin 0.45s 0.2s ease both;
-  transition: background 0.6s, border-color 0.6s;
+ 
+/* ── MÉTRICAS RÁPIDAS (substitui coluna direita 2a linha) ── */
+.metrics-quick {
+  display: flex; flex-direction: column; gap: 10px;
 }
-.copy-header {
-  display:flex; align-items:center; justify-content:space-between;
-  padding: 14px 18px 0;
-}
-.copy-tabs {
-  display:flex; gap:3px;
-  padding: 8px 18px 0;
-}
-.copy-tab {
-  padding: 5px 12px; border-radius:100px; font-size:11px; font-weight:600;
-  cursor:pointer; border:none; font-family:var(--font-body);
-  background: transparent; color: var(--text-dim); transition: all 0.2s;
-}
-.copy-tab.active { background:var(--glow-soft); color:var(--accent1); border:1px solid var(--border-accent); }
-.copy-tab:hover:not(.active) { background:rgba(255,255,255,0.05); color:var(--text-mid); }
-
-.copy-output {
-  padding: 12px 18px 16px;
-  font-size: 12px; line-height: 1.7; color: var(--text-mid);
-  min-height: 110px;
-  border-top: 1px solid var(--border);
-  margin-top: 8px;
-  position: relative;
-}
-.copy-placeholder {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 8px; height: 110px; color: var(--text-dim);
-  font-size: 11px; text-align: center;
-}
-.copy-placeholder .ico { font-size: 26px; opacity: 0.5; }
-.copy-footer {
+.metric-row {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0 18px 14px;
-}
-.copy-actions { display:flex; gap:7px; }
-.copy-btn {
-  display:inline-flex; align-items:center; gap:5px;
-  padding: 6px 13px; border-radius:100px; font-size:11px; font-weight:600;
-  cursor:pointer; border:none; font-family:var(--font-body);
-  background: var(--glow-soft); color: var(--accent1); border:1px solid var(--border-accent);
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 12px;
   transition: all 0.2s;
+  cursor: pointer;
 }
-.copy-btn:hover { background: var(--glow); }
-.copy-btn.primary { background: var(--btn-bg); color: #fff; border: none; box-shadow: 0 0 12px var(--glow-soft); }
-.copy-typing::after { content: '|'; animation: blink 0.7s step-end infinite; }
-
+.metric-row:hover { border-color: var(--border-accent); background: var(--glow-soft); }
+.metric-row-label { font-size: 11px; color: var(--text-dim); }
+.metric-row-val {
+  font-family: var(--font-mono);
+  font-size: 14px; font-weight: 700; color: var(--accent1);
+}
+ 
 /* ── BOTTOM GRID ── */
 .bottom-grid {
   display: grid;
   grid-template-columns: 1.7fr 1fr 1fr;
   gap: 14px;
 }
-
+ 
 /* Recent Activity */
 .file-row {
   display:flex; align-items:center; gap:10px;
@@ -501,43 +427,24 @@ body {
 .file-badge {
   font-family: var(--font-mono);
   font-size: 9px; color: var(--accent1); flex-shrink:0;
-  transition: color 0.6s;
 }
-
-/* ── INVENTORY BENTO ── */
-.inventory-card { display:flex; flex-direction:column; }
-.inv-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:4px; }
-.inv-item {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  border-radius: 10px; padding:10px 10px 8px;
-  cursor:pointer; transition:all 0.2s;
-  position: relative; overflow:hidden;
-}
-.inv-item:hover { border-color: var(--border-accent); background: var(--glow-soft); }
-.inv-item-ico { font-size: 18px; margin-bottom: 4px; }
-.inv-item-name { font-size: 10px; font-weight: 600; color: var(--text-mid); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.inv-item-count { font-family:var(--font-mono); font-size: 9px; color: var(--accent1); margin-top:2px; transition:color 0.6s; }
-.inv-item-bar { height:2px; background:rgba(255,255,255,0.06); border-radius:100px; margin-top:6px; overflow:hidden; }
-.inv-item-fill { height:100%; background:var(--btn-bg); border-radius:100px; transition:background 0.6s; }
-.inv-add {
-  display:flex; align-items:center; justify-content:center; gap:6px;
-  background: var(--glow-soft);
-  border: 1px dashed var(--border-accent);
-  border-radius: 10px; padding: 10px;
-  cursor:pointer; transition:all 0.2s;
-  font-size:11px; color:var(--accent1); font-weight:600;
-}
-.inv-add:hover { background: var(--glow); }
-
+ 
+/* ── FUNIL ── */
+.funil-card { display:flex; flex-direction:column; }
+.funil-row { margin-bottom: 12px; }
+.funil-label { display:flex; justify-content:space-between; font-size:11px; color:var(--text-dim); margin-bottom:5px; }
+.funil-label span:last-child { color: var(--accent1); font-family: var(--font-mono); font-weight: 700; }
+.funil-track { height:5px; background:rgba(255,255,255,0.06); border-radius:100px; overflow:hidden; }
+.funil-fill { height:100%; border-radius:100px; }
+ 
 /* Donut */
 .donut-card { display:flex; flex-direction:column; align-items:center; }
 .donut-wrap { position:relative; width:120px; height:120px; margin-top:8px; }
 .donut-svg { width:100%; height:100%; transform:rotate(-90deg); }
 .donut-inner { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-.donut-pct { font-family:var(--font-mono); font-size:19px; font-weight:700; color:var(--accent1); transition:color 0.6s; }
+.donut-pct { font-family:var(--font-mono); font-size:19px; font-weight:700; color:var(--accent1); }
 .donut-lbl { font-size:8px; color:var(--text-dim); letter-spacing:0.5px; }
-
+ 
 /* ── TOAST ── */
 .toast {
   position:fixed; bottom:22px; right:22px;
@@ -550,8 +457,8 @@ body {
   z-index:999; max-width:320px;
 }
 .toast.show { transform:translateY(0); opacity:1; }
-
-/* ── MODAL ── */
+ 
+/* ── MODAL WA ── */
 .modal-overlay {
   display:none; position:fixed; inset:0;
   background:rgba(4,8,18,0.92);
@@ -577,11 +484,6 @@ body {
 .modal-x:hover { background:rgba(255,255,255,0.13); color:#fff; }
 .modal h2 { font-family:var(--font-display); font-size:18px; font-weight:800; margin-bottom:5px; }
 .modal p { font-size:12px; color:var(--text-dim); margin-bottom:20px; line-height:1.65; }
-.modal-qr-area {
-  background:rgba(255,255,255,0.02); border:1px solid rgba(0,200,255,0.18);
-  border-radius:16px; padding:20px; display:flex; flex-direction:column; align-items:center; gap:12px;
-  margin-bottom:18px;
-}
 .modal-step { display:flex; align-items:center; gap:10px; font-size:12px; color:var(--text-mid); margin-bottom:8px; }
 .sn {
   width:24px; height:24px; border-radius:50%;
@@ -589,13 +491,7 @@ body {
   display:flex; align-items:center; justify-content:center;
   font-size:10px; font-weight:700; color:rgba(0,200,255,0.9); flex-shrink:0;
 }
-
-/* ── THEME TRANSITION ── */
-* { transition: border-color 0.5s, background-color 0.5s, box-shadow 0.5s, color 0.5s; }
-.card { transition: border-color 0.5s, background-color 0.5s, box-shadow 0.5s, color 0.5s, transform 0.18s, opacity 0.45s; }
-canvas { transition: none !important; }
-
-/* ── SCROLLBAR ── */
+ 
 ::-webkit-scrollbar { width:5px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.12); border-radius:100px; }
@@ -603,59 +499,49 @@ canvas { transition: none !important; }
 </head>
 <body>
 <div class="shell" id="shell">
-
+ 
   <!-- NAV -->
   <div class="topnav">
     <div class="nav-logo">
-      <div class="nav-logo-icon" id="logo-icon">🏠</div>
-      Lisa
+      <div class="nav-logo-icon">⚡</div>
+      KIRA
     </div>
-
-    <!-- NICHE SELECTOR -->
-    <div class="nav-center">
-      <button class="niche-pill active" data-theme="luxury" onclick="setTheme(this,'luxury')">
-        ✦ Luxo &amp; Imóveis
-      </button>
-      <button class="niche-pill" data-theme="tech" onclick="setTheme(this,'tech')">
-        ⚡ Tech &amp; Gadgets
-      </button>
-      <button class="niche-pill" data-theme="retail" onclick="setTheme(this,'retail')">
-        🔥 Varejo &amp; Rápido
-      </button>
+    <div class="tenant-badge">
+      <div class="wa-dot"></div>
+      <span id="tenantDisplay">Carregando...</span>
     </div>
-
     <div class="nav-right">
       <button class="wa-btn" onclick="openModal()">
         <div class="wa-dot"></div>
         📱 WhatsApp
       </button>
+      <div class="nav-icon-btn" onclick="window.location.href='/?tenant='+slug">💬</div>
       <div class="nav-icon-btn">🔔</div>
-      <div class="nav-icon-btn">👤</div>
     </div>
   </div>
-
+ 
   <div class="main">
     <!-- TITLE ROW -->
     <div class="title-row">
       <div style="display:flex;align-items:center;gap:10px">
-        <div class="dashboard-title" id="dash-title">Lisa — Luxury &amp; Real Estate AI</div>
-        <div class="title-badge" id="live-badge">● AO VIVO</div>
+        <div class="dashboard-title" id="dash-title">Kira IA — Dashboard em Tempo Real</div>
+        <div class="title-badge">● AO VIVO</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-dim)">
-        <div id="nicho-label" style="color:var(--accent1);font-weight:600;">✦ MODO LUXO</div>
+        <div style="color:var(--accent1);font-weight:600;">⚡ KIRA ATIVA</div>
       </div>
     </div>
-
+ 
     <!-- TOP GRID -->
     <div class="top-grid">
-
+ 
       <!-- Market Pulse -->
       <div class="card market-pulse" style="animation-delay:0.05s">
         <div class="card-glow"></div>
         <div class="card-header">
           <div>
-            <div class="card-title">Market Pulse</div>
-            <div class="card-sub" id="chart-sub">Imóveis premium · ao vivo</div>
+            <div class="card-title">Kira Pulse</div>
+            <div class="card-sub">Conversas · tempo real</div>
           </div>
           <div class="card-arrow">›</div>
         </div>
@@ -664,22 +550,96 @@ canvas { transition: none !important; }
         </div>
         <div class="mini-stats">
           <div class="mini-stat">
-            <div class="mini-stat-val" id="stat1">+12.4%</div>
-            <div class="mini-stat-lbl">Valorização</div>
+            <div class="mini-stat-val" id="stat-conv">0</div>
+            <div class="mini-stat-lbl">Conversas</div>
           </div>
           <div class="mini-stat">
-            <div class="mini-stat-val" id="stat2">R$2.4M</div>
-            <div class="mini-stat-lbl">Ticket médio</div>
+            <div class="mini-stat-val" id="stat-leads">0</div>
+            <div class="mini-stat-lbl">Leads activos</div>
           </div>
           <div class="mini-stat">
-            <div class="mini-stat-val" id="stat3">94</div>
-            <div class="mini-stat-lbl">Leads ativos</div>
+            <div class="mini-stat-val" id="stat-score">0</div>
+            <div class="mini-stat-lbl">Score médio</div>
           </div>
         </div>
       </div>
-
-      <!-- DROPZONE -->
-      <div class="card dropzone" id="dropzone" onclick="triggerProc()" style="animation-delay:0.1s">
+ 
+      <!-- LEADS AO VIVO -->
+      <div class="leads-panel" style="animation-delay:0.1s">
+        <div class="leads-header">
+          <div class="card-title">🔥 Leads ao Vivo</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div id="leads-count" style="font-size:10px;color:var(--text-dim);">0 leads</div>
+            <div class="card-arrow">›</div>
+          </div>
+        </div>
+        <div class="leads-tabs">
+          <button class="leads-tab active" onclick="filterLeads(this,'all')">Todos</button>
+          <button class="leads-tab" onclick="filterLeads(this,'hot')">🔥 Quentes</button>
+          <button class="leads-tab" onclick="filterLeads(this,'warm')">💙 Mornos</button>
+          <button class="leads-tab" onclick="filterLeads(this,'cold')">❄️ Frios</button>
+        </div>
+        <div class="leads-list" id="leads-list">
+          <div style="text-align:center;padding:30px;color:var(--text-dim);font-size:12px">
+            A Kira está a aguardar leads...<br>
+            <span style="font-size:10px;font-family:var(--font-mono)">Partilha o link dos clientes</span>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- QR -->
+      <div class="card qr-card" style="animation-delay:0.15s">
+        <div class="card-glow"></div>
+        <div class="qr-wrap">
+          <div class="qr-aura-ring"></div>
+          <div class="qr-box" id="qr-container">
+            <svg viewBox="0 0 180 180" width="136" height="136" fill="none">
+              <rect width="180" height="180" fill="white"/>
+              <rect x="10" y="10" width="55" height="55" rx="6" fill="#060d1f"/>
+              <rect x="18" y="18" width="39" height="39" rx="4" fill="white"/>
+              <rect x="26" y="26" width="23" height="23" rx="3" fill="#00FFCC"/>
+              <rect x="115" y="10" width="55" height="55" rx="6" fill="#060d1f"/>
+              <rect x="123" y="18" width="39" height="39" rx="4" fill="white"/>
+              <rect x="131" y="26" width="23" height="23" rx="3" fill="#00FFCC"/>
+              <rect x="10" y="115" width="55" height="55" rx="6" fill="#060d1f"/>
+              <rect x="18" y="123" width="39" height="39" rx="4" fill="white"/>
+              <rect x="26" y="131" width="23" height="23" rx="3" fill="#00FFCC"/>
+              <rect x="76" y="10" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="90" y="10" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="104" y="10" width="9" height="9" rx="1.5" fill="#060d1f"/>
+              <rect x="76" y="24" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="97" y="24" width="9" height="9" rx="1.5" fill="#060d1f"/>
+              <rect x="83" y="38" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="97" y="38" width="9" height="9" rx="1.5" fill="#00FFCC"/><rect x="104" y="38" width="9" height="9" rx="1.5" fill="#060d1f"/>
+              <rect x="76" y="52" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="90" y="52" width="9" height="9" rx="1.5" fill="#060d1f"/>
+              <rect x="10" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="24" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="38" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="52" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="66" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="76" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="90" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="100" y="76" width="9" height="9" rx="1.5" fill="#0088FF"/><rect x="115" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="129" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="143" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="157" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/>
+              <rect x="10" y="90" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="31" y="90" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="52" y="90" width="9" height="9" rx="1.5" fill="#060d1f"/>
+              <rect x="115" y="115" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="132" y="115" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="143" y="129" width="9" height="9" rx="1.5" fill="#0088FF"/><rect x="115" y="143" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="129" y="143" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="150" y="143" width="9" height="9" rx="1.5" fill="#060d1f"/>
+            </svg>
+          </div>
+        </div>
+        <div class="qr-caption">
+          <strong>Link dos Clientes</strong>
+          <button onclick="copyClientLink()" style="margin-top:6px;padding:6px 14px;border-radius:20px;border:1px solid var(--border-accent);background:var(--glow-soft);color:var(--accent1);font-size:10px;cursor:pointer;font-weight:600">📋 Copiar Link</button>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- SECOND GRID -->
+    <div class="second-grid">
+ 
+      <!-- AI Insights -->
+      <div class="card" style="animation-delay:0.2s">
+        <div class="card-glow"></div>
+        <div class="card-header">
+          <div><div class="card-title">Kira Insights</div><div class="card-sub">Neuropsicologia · tempo real</div></div>
+          <div class="card-arrow">›</div>
+        </div>
+        <div class="wave-wrap"><canvas id="c-wave"></canvas></div>
+        <div class="progress-section">
+          <div class="prog-row">Confiança da Kira: <strong id="conf-pct">94%</strong></div>
+          <div class="prog-track"><div class="prog-fill"></div></div>
+        </div>
+      </div>
+ 
+      <!-- KIRA STATUS CENTRAL -->
+      <div class="card" style="animation-delay:0.22s;background:#060a12;border-color:var(--border-accent)">
         <div class="ring-bg"></div>
         <div class="rings-wrap">
           <div class="ring ring-1"></div>
@@ -690,201 +650,122 @@ canvas { transition: none !important; }
           <div class="ring ring-6"></div>
           <div class="ring-core"></div>
         </div>
-
-        <div class="dz-content" id="dz-def">
-          <div style="position:relative;z-index:5;width:100%">
-            <div class="card-header">
-              <div class="card-title" id="dz-title">Alimentar a Inteligência da Lisa</div>
+        <div class="dz-content">
+          <div style="position:relative;z-index:5;width:100%;text-align:center">
+            <div style="font-family:var(--font-display);font-size:22px;font-weight:800;background:linear-gradient(135deg,#00FFCC,#0088FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px">KIRA</div>
+            <div style="font-size:10px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">Vendedora Autónoma de Elite</div>
+            <div id="kira-status-text" style="font-size:11px;color:var(--accent1);font-family:var(--font-mono);background:rgba(0,255,204,0.05);border:1px solid var(--border-accent);border-radius:8px;padding:8px 12px;text-align:left;line-height:1.8">
+              → Analisando leads...<br>
+              → Aplicando neuropsicologia...<br>
+              → Pronta para vender 🚀
+            </div>
+            <div style="margin-top:12px;display:flex;gap:8px;justify-content:center">
+              <div id="metric-vendas" style="text-align:center;padding:8px 14px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:10px">
+                <div style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:#00FF88" id="vendas-count">0</div>
+                <div style="font-size:9px;color:var(--text-dim);margin-top:2px">VENDAS</div>
+              </div>
+              <div style="text-align:center;padding:8px 14px;background:rgba(0,136,255,0.08);border:1px solid rgba(0,136,255,0.2);border-radius:10px">
+                <div style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--accent2)" id="receita-count">R$0</div>
+                <div style="font-size:9px;color:var(--text-dim);margin-top:2px">RECEITA</div>
+              </div>
             </div>
           </div>
-          <div class="dz-icon" id="dz-icon">🏠</div>
-          <div class="dz-label" id="dz-label">Propriedade Premium.mp4</div>
-          <div class="dz-hint" id="dz-hint">Solte vídeos, fotos, PDFs ou planilhas<br>para Lisa analisar e gerar anúncios</div>
-          <div class="dz-cta">⚡ Processar com IA</div>
-        </div>
-
-        <div class="proc-overlay" id="dz-proc">
-          <div class="proc-title" id="proc-title">⚡ Lisa Analisando…</div>
-          <div class="proc-pct" id="proc-num">0%</div>
-          <div class="proc-bars">
-            <div class="pb-row"><div class="pb-name" id="bar1">OCR &amp; Extração</div><div class="pb-track"><div class="pb-fill" style="animation-delay:0s"></div></div></div>
-            <div class="pb-row"><div class="pb-name" id="bar2">Análise IA</div><div class="pb-track"><div class="pb-fill" style="animation-delay:0.5s"></div></div></div>
-            <div class="pb-row"><div class="pb-name" id="bar3">Copy &amp; Mídia</div><div class="pb-track"><div class="pb-fill" style="animation-delay:1s"></div></div></div>
-          </div>
-          <div class="proc-fname" id="proc-fname" style="font-size:10px;color:var(--text-dim);">Propriedade_Premium.mp4 · 87MB</div>
         </div>
       </div>
-
-      <!-- QR -->
-      <div class="card qr-card" style="animation-delay:0.15s">
+ 
+      <!-- MÉTRICAS RÁPIDAS -->
+      <div class="card metrics-quick" style="animation-delay:0.24s">
         <div class="card-glow"></div>
-        <div class="qr-wrap">
-          <div class="qr-aura-ring"></div>
-          <div class="qr-box">
-            <svg viewBox="0 0 180 180" width="136" height="136" fill="none">
-              <rect width="180" height="180" fill="white"/>
-              <rect x="10" y="10" width="55" height="55" rx="6" fill="#060d1f"/>
-              <rect x="18" y="18" width="39" height="39" rx="4" fill="white"/>
-              <rect x="26" y="26" width="23" height="23" rx="3" fill="#C9A84C" id="qr-tl"/>
-              <rect x="115" y="10" width="55" height="55" rx="6" fill="#060d1f"/>
-              <rect x="123" y="18" width="39" height="39" rx="4" fill="white"/>
-              <rect x="131" y="26" width="23" height="23" rx="3" fill="#C9A84C" id="qr-tr"/>
-              <rect x="10" y="115" width="55" height="55" rx="6" fill="#060d1f"/>
-              <rect x="18" y="123" width="39" height="39" rx="4" fill="white"/>
-              <rect x="26" y="131" width="23" height="23" rx="3" fill="#C9A84C" id="qr-bl"/>
-              <rect x="76" y="10" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="90" y="10" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="104" y="10" width="9" height="9" rx="1.5" fill="#060d1f"/>
-              <rect x="76" y="24" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="97" y="24" width="9" height="9" rx="1.5" fill="#060d1f"/>
-              <rect x="83" y="38" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="97" y="38" width="9" height="9" rx="1.5" fill="#C9A84C" id="qr-dot"/><rect x="104" y="38" width="9" height="9" rx="1.5" fill="#060d1f"/>
-              <rect x="76" y="52" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="90" y="52" width="9" height="9" rx="1.5" fill="#060d1f"/>
-              <rect x="10" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="24" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="38" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="52" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="66" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="76" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="90" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="100" y="76" width="9" height="9" rx="1.5" fill="#C9A84C" id="qr-dot2"/><rect x="115" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="129" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="143" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="157" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/>
-              <rect x="10" y="90" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="31" y="90" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="52" y="90" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="76" y="90" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="97" y="90" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="115" y="90" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="136" y="90" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="157" y="90" width="9" height="9" rx="1.5" fill="#060d1f"/>
-              <rect x="115" y="115" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="132" y="115" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="143" y="129" width="9" height="9" rx="1.5" fill="#C9A84C" id="qr-dot3"/><rect x="115" y="143" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="129" y="143" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="150" y="143" width="9" height="9" rx="1.5" fill="#060d1f"/>
-            </svg>
-          </div>
-        </div>
-        <div class="qr-caption">
-          <strong>Escanear &amp; Conversar</strong>
-          com 'Lisa' em Tempo Real
-        </div>
-      </div>
-    </div>
-
-    <!-- SECOND GRID -->
-    <div class="second-grid">
-
-      <!-- AI Insights -->
-      <div class="card" style="animation-delay:0.2s">
-        <div class="card-glow"></div>
-        <div class="card-header">
-          <div><div class="card-title">AI Insights</div><div class="card-sub" id="insight-sub">Análise de mercado premium</div></div>
+        <div class="card-header" style="margin-bottom:8px">
+          <div class="card-title">Métricas</div>
           <div class="card-arrow">›</div>
         </div>
-        <div class="wave-wrap"><canvas id="c-wave"></canvas></div>
-        <div class="progress-section">
-          <div class="prog-row">Confiança da IA: <strong id="conf-pct">87%</strong></div>
-          <div class="prog-track"><div class="prog-fill"></div></div>
+        <div class="metric-row">
+          <div class="metric-row-label">Taxa Conversão</div>
+          <div class="metric-row-val" id="taxa-conv">0%</div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-row-label">Leads Quentes</div>
+          <div class="metric-row-val" id="leads-quentes">0</div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-row-label">Tempo Médio Resp.</div>
+          <div class="metric-row-val">1.2s</div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-row-label">Score Médio</div>
+          <div class="metric-row-val" id="score-medio">0</div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-row-label">Satisfação</div>
+          <div class="metric-row-val">94%</div>
         </div>
       </div>
-
-      <!-- COPY GENERATOR -->
-      <div class="copy-panel" id="copy-panel">
-        <div class="copy-header">
-          <div class="card-title">🖊 Gerador de Copy da Lisa</div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <div id="copy-status" style="font-size:10px;color:var(--text-dim);">Aguardando upload…</div>
-            <div class="card-arrow">›</div>
-          </div>
-        </div>
-        <div class="copy-tabs">
-          <button class="copy-tab active" onclick="setCopyTab(this,'ad')" id="tab-ad">📢 Anúncio</button>
-          <button class="copy-tab" onclick="setCopyTab(this,'wa')" id="tab-wa">💬 WhatsApp</button>
-          <button class="copy-tab" onclick="setCopyTab(this,'email')" id="tab-email">📧 E-mail</button>
-        </div>
-        <div class="copy-output" id="copy-output">
-          <div class="copy-placeholder" id="copy-placeholder">
-            <div class="ico">🌀</div>
-            <div>Processe um arquivo para Lisa<br>gerar 3 copies automaticamente</div>
-          </div>
-          <div id="copy-text" style="display:none;font-size:12px;line-height:1.75;color:var(--text-mid);"></div>
-        </div>
-        <div class="copy-footer">
-          <div class="copy-actions">
-            <button class="copy-btn" onclick="copyCopy()">📋 Copiar</button>
-            <button class="copy-btn" onclick="generateCopy()">🔄 Regenerar</button>
-          </div>
-          <button class="copy-btn primary" id="send-wa-btn" onclick="sendToWA()" style="display:none">📲 Enviar WA</button>
-        </div>
-      </div>
-
-      <!-- RIGHT: empty (visual continuation of QR) -->
-      <div style="background:transparent;border:none;pointer-events:none;"></div>
     </div>
-
+ 
     <!-- BOTTOM GRID -->
     <div class="bottom-grid">
-
-      <!-- Recent Activity -->
+ 
+      <!-- Actividade Recente -->
       <div class="card" style="animation-delay:0.28s">
         <div class="card-glow"></div>
         <div class="card-header">
-          <div class="card-title">Atividade Recente</div>
+          <div class="card-title">Actividade Recente</div>
           <div class="card-arrow">›</div>
         </div>
         <div id="activity-list">
-          <div class="file-row">
-            <div class="file-ico">🏠</div>
-            <div class="file-info"><div class="file-name">Cobertura_Ipanema_Tour.mp4</div><div class="file-meta">3 copies gerados · Lisa analisou em 42s</div></div>
-            <div class="file-badge">24m atrás</div>
-          </div>
-          <div class="file-row">
-            <div class="file-ico">📄</div>
-            <div class="file-info"><div class="file-name">Contrato_Locação_Premium.pdf</div><div class="file-meta">Termos extraídos · Resumo gerado</div></div>
-            <div class="file-badge">1h atrás</div>
-          </div>
-          <div class="file-row">
-            <div class="file-ico">📷</div>
-            <div class="file-info"><div class="file-name">Fotos_Apartamento_Leblon.zip</div><div class="file-meta">18 fotos · Legendas criadas · SEO</div></div>
-            <div class="file-badge">2h atrás</div>
-          </div>
-          <div class="file-row">
-            <div class="file-ico">📊</div>
-            <div class="file-info"><div class="file-name">Planilha_Pricing_Q4.xlsx</div><div class="file-meta">Análise competitiva · 14 insights</div></div>
-            <div class="file-badge">3h atrás</div>
+          <div style="text-align:center;padding:20px;color:var(--text-dim);font-size:12px">
+            Sem actividade ainda
           </div>
         </div>
       </div>
-
-      <!-- INVENTORY BENTO -->
-      <div class="card inventory-card" style="animation-delay:0.32s">
+ 
+      <!-- Funil -->
+      <div class="card funil-card" style="animation-delay:0.32s">
         <div class="card-glow"></div>
-        <div class="card-header">
-          <div class="card-title">Inventário</div>
+        <div class="card-header" style="margin-bottom:8px">
+          <div class="card-title">Funil de Vendas</div>
           <div class="card-arrow">›</div>
         </div>
-        <div class="inv-grid" id="inv-grid">
-          <div class="inv-item">
-            <div class="inv-item-ico" id="inv-ico-1">🏠</div>
-            <div class="inv-item-name" id="inv-name-1">Imóveis</div>
-            <div class="inv-item-count" id="inv-cnt-1">12 ativos</div>
-            <div class="inv-item-bar"><div class="inv-item-fill" style="width:80%"></div></div>
-          </div>
-          <div class="inv-item">
-            <div class="inv-item-ico" id="inv-ico-2">📹</div>
-            <div class="inv-item-name" id="inv-name-2">Vídeos</div>
-            <div class="inv-item-count" id="inv-cnt-2">7 processados</div>
-            <div class="inv-item-bar"><div class="inv-item-fill" style="width:55%"></div></div>
-          </div>
-          <div class="inv-item">
-            <div class="inv-item-ico" id="inv-ico-3">📄</div>
-            <div class="inv-item-name" id="inv-name-3">Contratos</div>
-            <div class="inv-item-count" id="inv-cnt-3">23 docs</div>
-            <div class="inv-item-bar"><div class="inv-item-fill" style="width:92%"></div></div>
-          </div>
-          <div class="inv-add" onclick="showToast('Módulo de upload em breve! 🚀')">+ Novo Item</div>
+        <div class="funil-row">
+          <div class="funil-label"><span>Contactos</span><span id="f1">0</span></div>
+          <div class="funil-track"><div class="funil-fill" style="width:100%;background:var(--accent1);box-shadow:0 0 8px var(--accent1)"></div></div>
+        </div>
+        <div class="funil-row">
+          <div class="funil-label"><span>Qualificados</span><span id="f2">0</span></div>
+          <div class="funil-track"><div class="funil-fill" style="width:60%;background:var(--accent2);box-shadow:0 0 8px var(--accent2)"></div></div>
+        </div>
+        <div class="funil-row">
+          <div class="funil-label"><span>Interessados</span><span id="f3">0</span></div>
+          <div class="funil-track"><div class="funil-fill" style="width:35%;background:#AA44FF;box-shadow:0 0 8px #AA44FF"></div></div>
+        </div>
+        <div class="funil-row">
+          <div class="funil-label"><span>Fechados</span><span id="f4">0</span></div>
+          <div class="funil-track"><div class="funil-fill" style="width:15%;background:#00FF88;box-shadow:0 0 8px #00FF88"></div></div>
         </div>
       </div>
-
-      <!-- DONUT -->
+ 
+      <!-- Donut ROI -->
       <div class="card donut-card" style="animation-delay:0.36s">
         <div class="card-glow"></div>
         <div class="card-header" style="width:100%">
-          <div class="card-title" id="donut-title">Portfólio</div>
+          <div class="card-title">ROI da Kira</div>
           <div class="card-arrow">›</div>
         </div>
         <div class="donut-wrap">
           <svg class="donut-svg" viewBox="0 0 120 120">
             <defs>
               <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#C9A84C" id="gstop1a"/>
-                <stop offset="100%" stop-color="#8B6914" id="gstop1b"/>
+                <stop offset="0%" stop-color="#00FFCC"/>
+                <stop offset="100%" stop-color="#0088FF"/>
               </linearGradient>
               <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#25D366"/>
                 <stop offset="100%" stop-color="#00b4d8"/>
               </linearGradient>
               <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#0a3d8f"/>
-                <stop offset="100%" stop-color="#1a5cb8"/>
+                <stop offset="0%" stop-color="#7B00FF"/>
+                <stop offset="100%" stop-color="#AA44FF"/>
               </linearGradient>
             </defs>
             <circle cx="60" cy="60" r="46" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="18"/>
@@ -893,332 +774,197 @@ canvas { transition: none !important; }
             <circle cx="60" cy="60" r="46" fill="none" stroke="url(#g3)" stroke-width="18" stroke-dasharray="50 239" stroke-dashoffset="-202" stroke-linecap="round"/>
           </svg>
           <div class="donut-inner">
-            <div class="donut-pct" id="donut-pct">68%</div>
-            <div class="donut-lbl" id="donut-lbl">ocupado</div>
+            <div class="donut-pct" id="roi-pct">0x</div>
+            <div class="donut-lbl">ROI</div>
           </div>
         </div>
-        <div style="margin-top:8px;font-size:10px;color:var(--text-dim);text-align:center;">
-          <span style="color:var(--accent1);transition:color 0.6s;">▲ +4.2%</span> vs mês anterior
+        <div style="margin-top:8px;font-size:10px;color:var(--text-dim);text-align:center">
+          <span style="color:var(--accent1)">▲ Kira a trabalhar</span>
         </div>
       </div>
     </div>
   </div>
 </div>
-
+ 
 <!-- MODAL WA -->
 <div class="modal-overlay" id="wa-modal" onclick="bgClose(event)">
   <div class="modal">
     <div class="modal-x" onclick="closeModal()">✕</div>
     <h2>📱 Conectar WhatsApp</h2>
-    <p>Lisa gerencia seus leads e responde clientes automaticamente com IA em tempo real, 24/7.</p>
-    <div class="modal-qr-area">
-      <div style="font-size:10px;letter-spacing:2px;color:rgba(0,200,255,0.6);text-transform:uppercase;">Escaneie com seu celular</div>
-      <div style="background:#fff;border-radius:10px;padding:6px;width:152px;height:152px;">
-        <svg viewBox="0 0 180 180" width="140" height="140" fill="none">
-          <rect width="180" height="180" fill="white"/>
-          <rect x="10" y="10" width="55" height="55" rx="6" fill="#060d1f"/><rect x="18" y="18" width="39" height="39" rx="4" fill="white"/><rect x="26" y="26" width="23" height="23" rx="3" fill="#25D366"/>
-          <rect x="115" y="10" width="55" height="55" rx="6" fill="#060d1f"/><rect x="123" y="18" width="39" height="39" rx="4" fill="white"/><rect x="131" y="26" width="23" height="23" rx="3" fill="#25D366"/>
-          <rect x="10" y="115" width="55" height="55" rx="6" fill="#060d1f"/><rect x="18" y="123" width="39" height="39" rx="4" fill="white"/><rect x="26" y="131" width="23" height="23" rx="3" fill="#25D366"/>
-          <rect x="76" y="10" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="90" y="10" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="104" y="10" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="76" y="24" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="97" y="24" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="83" y="38" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="97" y="38" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="104" y="38" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="76" y="52" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="90" y="52" width="9" height="9" rx="1.5" fill="#060d1f"/>
-          <rect x="10" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="24" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="38" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="52" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="66" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="76" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="90" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="100" y="76" width="9" height="9" rx="1.5" fill="#00c8ff"/><rect x="115" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="129" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="143" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="157" y="76" width="9" height="9" rx="1.5" fill="#060d1f"/>
-          <rect x="10" y="90" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="31" y="90" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="52" y="90" width="9" height="9" rx="1.5" fill="#060d1f"/>
-          <rect x="115" y="115" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="132" y="115" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="143" y="129" width="9" height="9" rx="1.5" fill="#00c8ff"/><rect x="115" y="143" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="129" y="143" width="9" height="9" rx="1.5" fill="#060d1f"/><rect x="150" y="143" width="9" height="9" rx="1.5" fill="#060d1f"/>
-        </svg>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#25D366;">
-        <div style="width:8px;height:8px;border-radius:50%;background:#25D366;animation:blink 2s infinite;"></div>
-        Aguardando escaneamento…
+    <p>A Kira vai gerir os seus leads e responder clientes automaticamente com IA em tempo real, 24/7.</p>
+    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(0,200,255,0.18);border-radius:16px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:18px">
+      <div style="font-size:10px;letter-spacing:2px;color:rgba(0,200,255,0.6);text-transform:uppercase">Em breve — Evolution API</div>
+      <div style="font-size:13px;color:var(--text-mid);text-align:center;line-height:1.8">
+        A integração WhatsApp via Evolution API<br>está a ser implementada.<br><br>
+        <strong style="color:var(--accent1)">Disponível esta semana! 🚀</strong>
       </div>
     </div>
-    <div class="modal-step"><div class="sn">1</div>Abra o WhatsApp no seu celular</div>
-    <div class="modal-step"><div class="sn">2</div>Vá em Configurações → Dispositivos conectados</div>
-    <div class="modal-step"><div class="sn">3</div>Aponte a câmera para o QR code acima</div>
+    <div class="modal-step"><div class="sn">1</div>Evolution API instalada no servidor</div>
+    <div class="modal-step"><div class="sn">2</div>QR Code gerado para escanear</div>
+    <div class="modal-step"><div class="sn">3</div>Kira conectada ao seu WhatsApp</div>
   </div>
 </div>
-
+ 
 <!-- TOAST -->
 <div class="toast" id="toast">
   <span id="toast-ico">✅</span>
-  <span id="toast-msg">Lisa analisou com sucesso!</span>
+  <span id="toast-msg">Kira a trabalhar!</span>
 </div>
-
+ 
 <script>
-// ────────────────────────────────────────────────
-// THEME / NICHE SYSTEM
-// ────────────────────────────────────────────────
-const THEMES = {
-  luxury: {
-    key: 'luxury',
-    label: '✦ MODO LUXO',
-    dashTitle: 'Lisa — Luxury & Real Estate AI',
-    chartSub: 'Imóveis premium · ao vivo',
-    insightSub: 'Análise de mercado premium',
-    stat1: '+12.4%', stat2: 'R$2.4M', stat3: '94',
-    stat1l: 'Valorização', stat2l: 'Ticket médio', stat3l: 'Leads ativos',
-    logoIco: '🏠',
-    dzIco: '🏠', dzLabel: 'Propriedade_Premium.mp4', dzHint: 'Solte vídeos, fotos, PDFs ou planilhas<br>para Lisa analisar e gerar anúncios',
-    bar1: 'OCR & Extração', bar2: 'Análise IA', bar3: 'Copy & Mídia',
-    procTitle: '✦ Lisa Analisando…', procFname: 'Propriedade_Premium.mp4 · 87MB',
-    confPct: '87%', donutPct: '68%', donutLbl: 'ocupado', donutTitle: 'Portfólio',
-    inv: ['🏠','Imóveis','12 ativos','📹','Vídeos','7 processados','📄','Contratos','23 docs'],
-    activity: [
-      ['🏠','Cobertura_Ipanema_Tour.mp4','3 copies gerados · Lisa analisou em 42s','24m atrás'],
-      ['📄','Contrato_Locação_Premium.pdf','Termos extraídos · Resumo gerado','1h atrás'],
-      ['📷','Fotos_Apartamento_Leblon.zip','18 fotos · Legendas criadas · SEO','2h atrás'],
-      ['📊','Planilha_Pricing_Q4.xlsx','Análise competitiva · 14 insights','3h atrás'],
-    ],
-    copies: {
-      ad: '🏠 *COBERTURA EXCLUSIVA — IPANEMA*\n\n✨ 420m² de luxo e sofisticação com vista 360° para o mar e a cidade.\n\n3 suítes master · Piscina privativa · Área gourmet completa\n\n📍 Ipanema, Rio de Janeiro\n💰 A partir de R$ 8,5M\n\n→ Agende sua visita exclusiva com Lisa',
-      wa: '👋 Olá! Sou Lisa, assistente de imóveis premium.\n\nPrecisando de um imóvel de alto padrão? Tenho uma cobertura exclusiva em Ipanema disponível:\n\n✅ 420m² · Vista mar · 3 suítes\n✅ Piscina privativa · Segurança 24h\n\nPosso te enviar fotos e vídeo agora? 📲',
-      email: '**Assunto:** Oportunidade Exclusiva — Cobertura Ipanema 420m²\n\nPrezado(a),\n\nIdentifiquei um imóvel que corresponde ao seu perfil de busca: uma cobertura triplex com 420m² de área total, localizada na Rua Vieira Souto, com vista privilegiada para o mar.\n\nPrincipais diferenciais: piscina privativa aquecida, área gourmet com churrasqueira e forno de pizza, 4 vagas de garagem e segurança 24h com portaria física.\n\nEstaria disponível para uma visita esta semana?\n\nAtt,\nLisa — IA Real Estate',
-    },
-    qrColor: '#C9A84C',
-  },
-  tech: {
-    key: 'tech',
-    label: '⚡ MODO TECH',
-    dashTitle: 'Lisa — Tech & Gadgets AI Sales',
-    chartSub: 'Gadgets · conversões ao vivo',
-    insightSub: 'Benchmarks & tendências',
-    stat1: '+38.7%', stat2: '2.847', stat3: '312',
-    stat1l: 'Conversão', stat2l: 'Pedidos/dia', stat3l: 'Leads ativos',
-    logoIco: '⚡',
-    dzIco: '📦', dzLabel: 'Produto_Galaxy_Pro.jpg', dzHint: 'Solte fotos, fichas técnicas ou vídeos<br>para Lisa criar specs e comparativos',
-    bar1: 'Visão Computac.', bar2: 'Specs & Dados', bar3: 'SEO & Copy',
-    procTitle: '⚡ Lisa Processando…', procFname: 'Galaxy_Pro_X1.jpg · 24MB',
-    confPct: '94%', donutPct: '81%', donutLbl: 'conversão', donutTitle: 'Performance',
-    inv: ['📱','Smartphones','47 SKUs','💻','Notebooks','31 SKUs','🎧','Acessórios','89 SKUs'],
-    activity: [
-      ['📱','Galaxy_S25_Ultra.jpg','Specs extraídas · 3 copies criados · SEO','12m atrás'],
-      ['📋','Ficha_Técnica_CPU.pdf','Tabela comparativa gerada automaticamente','45m atrás'],
-      ['📹','Unboxing_iPhone16.mp4','Transcrição + pontos-chave extraídos','2h atrás'],
-      ['📊','Comparativo_Preços.xlsx','Análise competitiva · 22 insights gerados','4h atrás'],
-    ],
-    copies: {
-      ad: '⚡ *GALAXY PRO X1 — POTÊNCIA BRUTA*\n\nProcessador 4nm · 12GB RAM · Câmera 200MP\n\n🔋 Bateria 7000mAh · Carregamento 100W em 28min\n🖥 Display AMOLED 120Hz · IP68 certificado\n\n📦 Frete GRÁTIS · Nota fiscal · 1 ano de garantia\n\n→ Compre agora com 12% OFF no PIX',
-      wa: '⚡ Oi! Sou a Lisa da TechStore!\n\nVi que você consultou o Galaxy Pro X1. Tenho uma oferta especial só por hoje:\n\n✅ 12% OFF no PIX = R$ 3.509\n✅ Frete GRÁTIS + seguro\n✅ Entrega em 24h para sua cidade\n\nVou reservar uma unidade para você? 📲',
-      email: '**Assunto:** [OFERTA 24H] Galaxy Pro X1 com 12% OFF — Só Hoje\n\nOlá!\n\nCom base no seu interesse, reservamos uma unidade do Galaxy Pro X1 com desconto exclusivo.\n\nEspecificações principais: processador Snapdragon 8 Gen 4 (4nm), 12GB RAM LPDDR5, armazenamento 512GB UFS 4.0 e câmera tripla 200MP com estabilização óptica.\n\nPreço especial: R$ 3.509 no PIX (desconto de 12% vs. balcão).\n\nOferta válida apenas por 24 horas.\n\nAtenciosamente,\nLisa — IA da TechStore',
-    },
-    qrColor: '#00FFCC',
-  },
-  retail: {
-    key: 'retail',
-    label: '🔥 MODO URGÊNCIA',
-    dashTitle: 'Lisa — Retail & Fast Sales AI',
-    chartSub: 'Vendas · velocidade máxima',
-    insightSub: 'Giro de estoque · alertas',
-    stat1: '4.2K', stat2: 'R$89K', stat3: '↑ 287%',
-    stat1l: 'Pedidos hoje', stat2l: 'Faturamento', stat3l: 'vs ontem',
-    logoIco: '🔥',
-    dzIco: '🛍️', dzLabel: 'Produto_Oferta.jpg', dzHint: 'Solte o produto aqui — Lisa gera o<br>anúncio de urgência em segundos!',
-    bar1: 'Reconhec. Produto', bar2: 'Gatilho Mental', bar3: 'CTA Urgência',
-    procTitle: '🔥 Lisa Gerando Urgência…', procFname: 'Oferta_Flash_Tenis.jpg · 8MB',
-    confPct: '91%', donutPct: '74%', donutLbl: 'estoque', donutTitle: 'Estoque Giro',
-    inv: ['👟','Calçados','142 pares','👕','Roupas','89 peças','🎒','Acessórios','234 itens'],
-    activity: [
-      ['👟','Tenis_Nike_Air.jpg','Anúncio urgência criado · 4 variações','2m atrás'],
-      ['👕','Camisa_Polo_Premium.jpg','Copy WhatsApp gerado · Enviado 847x','18m atrás'],
-      ['📦','Estoque_Liquidação.xlsx','Alerta: 12 itens em risco de esgotamento','35m atrás'],
-      ['🎒','Mochila_Escolar_Lote.jpg','Campanha volta às aulas · 3 artes','1h atrás'],
-    ],
-    copies: {
-      ad: '🔥 *OFERTA RELÂMPAGO — ACABA HOJE!*\n\n👟 Tênis Nike Air Max 270\n\n❌ DE: R$ 799\n✅ POR: R$ 399 (50% OFF)\n\n⏳ Apenas 7 unidades restantes!\n📦 Entrega hoje para sua cidade\n💳 12x R$ 38 sem juros\n\n→ GARANTE O SEU AGORA antes de acabar!',
-      wa: '🔥 URGENTE! Última chance!\n\nOi! Sou Lisa da [Loja].\n\nO Tênis Nike Air Max que você viu está com 50% OFF:\n\nDE R$799 👉 POR R$399\n\n⚠️ Só 7 unidades restando!\n⏰ Promoção acaba em 3h\n\nVou separar um par para você? Me confirma o tamanho! 👟',
-      email: '**Assunto:** ⚠️ ÚLTIMAS UNIDADES — Nike Air Max 50% OFF (acaba hoje)\n\nVocê viu isso?!\n\nO Nike Air Max 270 que você olhou está 50% OFF mas estão acabando rápido — só 7 pares restando no estoque.\n\nPreço: R$ 399 (de R$ 799). Parcelamento: 12x R$ 38 sem juros. Entrega: hoje para sua cidade.\n\nNão perca: este link de desconto expira em 3 horas.\n\n[GARANTIR MEU PAR →]\n\nLisa — IA da [Sua Loja]',
-    },
-    qrColor: '#FF3D6B',
-  },
-};
-
-let currentTheme = 'luxury';
-let copyReady = false;
-let currentCopyTab = 'ad';
-
-function setTheme(btn, theme) {
-  if (currentTheme === theme) return;
-  currentTheme = theme;
-
-  // Pills
-  document.querySelectorAll('.niche-pill').forEach(p => p.classList.remove('active'));
+// CONFIG
+const slug = new URLSearchParams(window.location.search).get('tenant') 
+          || localStorage.getItem('kira_owner_slug') 
+          || '';
+const baseUrl = 'https://meu-chatbot-lisa.onrender.com';
+ 
+document.getElementById('tenantDisplay').textContent = slug || 'Sem tenant';
+ 
+// DADOS
+let allLeads = [];
+ 
+// CARREGAR DADOS
+async function loadDashboard() {
+  try {
+    const res = await fetch(`${baseUrl}/dashboard/stats?slug=${slug}`);
+    if (res.ok) {
+      const data = await res.json();
+      updateMetrics(data);
+      renderLeads(data.leads || []);
+      renderActivity(data.timeline || []);
+    }
+  } catch(e) {
+    // Modo demo
+    updateMetrics({
+      totalConversas: 23, leadsQualificados: 8, vendasFechadas: 2,
+      scoreMedio: 67, receita: 994, taxa: 34,
+      leads: [
+        { name: 'João Silva', score: 89, msg: '"Quero saber o preço do plano completo"', status: 'hot' },
+        { name: 'Ana Maria', score: 62, msg: '"Tenho interesse mas preciso pensar"', status: 'warm' },
+        { name: 'Carlos Santos', score: 31, msg: '"Só estou a ver as opções"', status: 'cold' },
+      ],
+      timeline: [
+        { ico: '🔥', name: 'Kira fechou venda', meta: 'João Silva · R$497', time: '14min' },
+        { ico: '💬', name: 'Novo lead entrou', meta: 'Ana Maria · score 62', time: '32min' },
+        { ico: '⚡', name: 'Follow-up enviado', meta: 'Carlos Santos · 3ª tentativa', time: '1h' },
+        { ico: '🎯', name: 'Lead qualificado', meta: 'Score 89 — decisão iminente', time: '2h' },
+      ]
+    });
+  }
+}
+ 
+function updateMetrics(data) {
+  animNum('stat-conv', data.totalConversas || 0);
+  animNum('stat-leads', data.leadsQualificados || 0);
+  animNum('stat-score', data.scoreMedio || 0);
+  animNum('vendas-count', data.vendasFechadas || 0);
+  document.getElementById('receita-count').textContent = 'R$' + (data.receita || 0).toLocaleString('pt-BR');
+  document.getElementById('taxa-conv').textContent = (data.taxa || 0) + '%';
+  document.getElementById('leads-quentes').textContent = data.leadsQualificados || 0;
+  document.getElementById('score-medio').textContent = data.scoreMedio || 0;
+  document.getElementById('f1').textContent = data.totalConversas || 0;
+  document.getElementById('f2').textContent = data.leadsQualificados || 0;
+  document.getElementById('f3').textContent = Math.floor((data.leadsQualificados || 0) * 0.5);
+  document.getElementById('f4').textContent = data.vendasFechadas || 0;
+  const roi = data.vendasFechadas ? Math.round((data.receita || 497) / 497) : 0;
+  document.getElementById('roi-pct').textContent = roi + 'x';
+  document.getElementById('leads-count').textContent = (data.leads || []).length + ' leads';
+}
+ 
+function animNum(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  let current = 0;
+  const step = target / 30;
+  const timer = setInterval(() => {
+    current += step;
+    if (current >= target) { current = target; clearInterval(timer); }
+    el.textContent = Math.floor(current);
+  }, 50);
+}
+ 
+// LEADS
+function filterLeads(btn, filter) {
+  document.querySelectorAll('.leads-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-
-  // CSS theme
-  document.getElementById('shell').setAttribute('data-theme', theme === 'luxury' ? '' : theme);
-
-  const t = THEMES[theme];
-
-  // Texts
-  document.getElementById('dash-title').innerHTML = t.dashTitle;
-  document.getElementById('nicho-label').textContent = t.label;
-  document.getElementById('chart-sub').textContent = t.chartSub;
-  document.getElementById('insight-sub').textContent = t.insightSub;
-  document.getElementById('logo-icon').textContent = t.logoIco;
-  document.getElementById('stat1').textContent = t.stat1;
-  document.getElementById('stat2').textContent = t.stat2;
-  document.getElementById('stat3').textContent = t.stat3;
-  document.getElementById('dz-icon').textContent = t.dzIco;
-  document.getElementById('dz-label').textContent = t.dzLabel;
-  document.getElementById('dz-hint').innerHTML = t.dzHint;
-  document.getElementById('bar1').textContent = t.bar1;
-  document.getElementById('bar2').textContent = t.bar2;
-  document.getElementById('bar3').textContent = t.bar3;
-  document.getElementById('proc-title').textContent = t.procTitle;
-  document.getElementById('proc-fname').textContent = t.procFname;
-  document.getElementById('conf-pct').textContent = t.confPct;
-  document.getElementById('donut-pct').textContent = t.donutPct;
-  document.getElementById('donut-lbl').textContent = t.donutLbl;
-  document.getElementById('donut-title').textContent = t.donutTitle;
-
-  // Mini stat labels
-  document.querySelectorAll('.mini-stat-lbl').forEach((el, i) => {
-    el.textContent = [t.stat1l, t.stat2l, t.stat3l][i];
-  });
-
-  // QR accent color
-  ['qr-tl','qr-tr','qr-bl','qr-dot','qr-dot2','qr-dot3'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.setAttribute('fill', t.qrColor);
-  });
-
-  // Inventory
-  document.getElementById('inv-ico-1').textContent = t.inv[0];
-  document.getElementById('inv-name-1').textContent = t.inv[1];
-  document.getElementById('inv-cnt-1').textContent = t.inv[2];
-  document.getElementById('inv-ico-2').textContent = t.inv[3];
-  document.getElementById('inv-name-2').textContent = t.inv[4];
-  document.getElementById('inv-cnt-2').textContent = t.inv[5];
-  document.getElementById('inv-ico-3').textContent = t.inv[6];
-  document.getElementById('inv-name-3').textContent = t.inv[7];
-  document.getElementById('inv-cnt-3').textContent = t.inv[8];
-
-  // Activity
-  const list = document.getElementById('activity-list');
-  list.innerHTML = t.activity.map(([ico,name,meta,time]) => `
-    <div class="file-row">
-      <div class="file-ico">${ico}</div>
-      <div class="file-info"><div class="file-name">${name}</div><div class="file-meta">${meta}</div></div>
-      <div class="file-badge">${time}</div>
+  const filtered = filter === 'all' ? allLeads : allLeads.filter(l => l.status === filter);
+  renderLeadsHTML(filtered);
+}
+ 
+function renderLeads(leads) {
+  allLeads = leads;
+  renderLeadsHTML(leads);
+}
+ 
+function renderLeadsHTML(leads) {
+  if (!leads.length) {
+    document.getElementById('leads-list').innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-dim);font-size:12px">Sem leads neste filtro</div>';
+    return;
+  }
+  document.getElementById('leads-list').innerHTML = leads.map(l => `
+    <div class="lead-item ${l.status}">
+      <div class="lead-avatar">${l.status === 'hot' ? '🔥' : l.status === 'warm' ? '💙' : '❄️'}</div>
+      <div class="lead-info">
+        <div class="lead-name">${l.name}</div>
+        <div class="lead-msg">${l.msg}</div>
+        <div class="lead-actions">
+          <button class="lead-btn lead-btn-kira" onclick="showToast('⚡ Kira a fechar a venda...')">⚡ Deixar Kira fechar</button>
+          <button class="lead-btn lead-btn-enter" onclick="showToast('👤 Abrindo conversa...')">👤 Entrar</button>
+        </div>
+      </div>
+      <div class="lead-score score-${l.status}">${l.score}</div>
     </div>
   `).join('');
-
-  // Reset copy
-  copyReady = false;
-  resetCopy();
-
-  showToast(`${t.logoIco} Modo ${t.label.split(' ').slice(1).join(' ')} ativado!`);
 }
-
-// ────────────────────────────────────────────────
-// COPY GENERATOR
-// ────────────────────────────────────────────────
-function setCopyTab(btn, tab) {
-  document.querySelectorAll('.copy-tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  currentCopyTab = tab;
-  if (copyReady) showCopy(tab);
+ 
+function renderActivity(items) {
+  if (!items.length) return;
+  document.getElementById('activity-list').innerHTML = items.map(i => `
+    <div class="file-row">
+      <div class="file-ico">${i.ico}</div>
+      <div class="file-info"><div class="file-name">${i.name}</div><div class="file-meta">${i.meta}</div></div>
+      <div class="file-badge">${i.time} atrás</div>
+    </div>
+  `).join('');
 }
-
-function showCopy(tab) {
-  const t = THEMES[currentTheme];
-  const text = t.copies[tab] || '';
-  const el = document.getElementById('copy-text');
-  el.style.display = 'block';
-  document.getElementById('copy-placeholder').style.display = 'none';
-  document.getElementById('send-wa-btn').style.display = 'inline-flex';
-  typeText(el, text);
+ 
+// KIRA STATUS ROTATION
+const activities = [
+  '→ Analisando perfil do lead...\n→ Score calculado: 89/100\n→ Aplicando técnica de fechamento',
+  '→ Lead quente detectado 🔥\n→ Enviando proposta personalizada\n→ Aguardando resposta...',
+  '→ Follow-up automático enviado\n→ 3 leads em processo activo\n→ Kira está a trabalhar 💪',
+  '→ Padrão de resistência detectado\n→ Aplicando recuo estratégico\n→ Reposicionando valor...',
+];
+let actIdx = 0;
+setInterval(() => {
+  actIdx = (actIdx + 1) % activities.length;
+  document.getElementById('kira-status-text').innerHTML = activities[actIdx].replace(/\n/g, '<br>');
+}, 4000);
+ 
+// LINK
+function copyClientLink() {
+  const link = slug ? `${baseUrl}/?tenant=${slug}` : '';
+  if (!link) { showToast('❌ Sem tenant configurado'); return; }
+  navigator.clipboard.writeText(link).then(() => showToast('📋 Link copiado!'));
 }
-
-function typeText(el, text, speed = 12) {
-  el.innerHTML = '';
-  el.classList.add('copy-typing');
-  let i = 0;
-  const iv = setInterval(() => {
-    el.innerHTML = text.substring(0, i).replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
-    i++;
-    if (i > text.length) {
-      clearInterval(iv);
-      el.classList.remove('copy-typing');
-    }
-  }, speed);
-}
-
-function generateCopy() {
-  if (!copyReady) { showToast('⚡ Faça um upload primeiro!'); return; }
-  showCopy(currentCopyTab);
-}
-
-function copyCopy() {
-  const text = document.getElementById('copy-text').innerText;
-  if (!text) { showToast('⚡ Nada para copiar ainda!'); return; }
-  navigator.clipboard.writeText(text).then(() => showToast('📋 Copy copiado para o clipboard!'));
-}
-
-function sendToWA() {
-  showToast('📲 Abrindo WhatsApp com o copy da Lisa…');
-}
-
-function resetCopy() {
-  document.getElementById('copy-text').style.display = 'none';
-  document.getElementById('copy-placeholder').style.display = 'flex';
-  document.getElementById('send-wa-btn').style.display = 'none';
-  document.getElementById('copy-status').textContent = 'Aguardando upload…';
-}
-
-// ────────────────────────────────────────────────
-// DROPZONE / PROCESSING
-// ────────────────────────────────────────────────
-let busy = false;
-function triggerProc() {
-  if (busy) return; busy = true;
-  const dz = document.getElementById('dropzone');
-  dz.classList.add('processing');
-  const el = document.getElementById('proc-num');
-  let p = 0;
-  const iv = setInterval(() => {
-    p = Math.min(p + Math.random() * 3.2, 100);
-    el.textContent = Math.floor(p) + '%';
-    if (p >= 100) {
-      clearInterval(iv);
-      setTimeout(() => {
-        dz.classList.remove('processing');
-        busy = false; el.textContent = '0%';
-        copyReady = true;
-        document.getElementById('copy-status').textContent = '✅ Pronto! 3 copies gerados';
-        showCopy(currentCopyTab);
-        showToast(`✅ Lisa gerou ${THEMES[currentTheme].logoIco} 3 copies prontos para usar!`);
-      }, 600);
-    }
-  }, 65);
-}
-
-const dz = document.getElementById('dropzone');
-dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor = 'var(--ring-color)'; });
-dz.addEventListener('dragleave', () => { dz.style.borderColor = ''; });
-dz.addEventListener('drop', e => { e.preventDefault(); dz.style.borderColor = ''; triggerProc(); });
-
-// ────────────────────────────────────────────────
+ 
 // TOAST
-// ────────────────────────────────────────────────
 let toastTimer = null;
 function showToast(msg) {
   const t = document.getElementById('toast');
   document.getElementById('toast-msg').textContent = msg;
   t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 4500);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 4000);
 }
-
-// ────────────────────────────────────────────────
+ 
 // MODAL
-// ────────────────────────────────────────────────
 function openModal() { document.getElementById('wa-modal').classList.add('open'); }
 function closeModal() { document.getElementById('wa-modal').classList.remove('open'); }
 function bgClose(e) { if (e.target === document.getElementById('wa-modal')) closeModal(); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-// ────────────────────────────────────────────────
+ 
 // MARKET PULSE CHART
-// ────────────────────────────────────────────────
 (function(){
   const canvas = document.getElementById('c-market');
   function resize() {
@@ -1231,83 +977,49 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal()
   }
   let state = resize();
   window.addEventListener('resize', () => { state = resize(); });
-
-  const pts = [0, 0.18, 0.10, 0.28, 0.20, 0.42, 0.32, 0.55, 0.45, 0.62, 0.52, 0.78, 0.68, 0.74, 0.80, 0.90, 1.0];
+  const pts = [0,0.18,0.10,0.28,0.20,0.42,0.32,0.55,0.45,0.62,0.52,0.78,0.68,0.74,0.80,0.90,1.0];
   let frame = 0;
-
-  function getAccent() {
-    const style = getComputedStyle(document.getElementById('shell'));
-    return style.getPropertyValue('--accent1').trim() || '#C9A84C';
-  }
-
-  function hexToRgb(hex) {
-    hex = hex.replace('#','');
-    if (hex.length === 3) hex = hex.split('').map(c=>c+c).join('');
-    const n = parseInt(hex, 16);
-    return [(n>>16)&255, (n>>8)&255, n&255];
-  }
-
   function draw() {
     const { w, h, ctx, dpr } = state;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, w, h);
-
-    const accent = getAccent();
-    let rgb = [201, 168, 76];
-    try { rgb = hexToRgb(accent); } catch(e) {}
-
-    const wave = pts.map((v, i) => ({
-      x: (i / (pts.length - 1)) * w,
-      y: h - v * h * 0.8 - h * 0.06 + Math.sin(frame * 0.038 + i * 0.8) * 3.5
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,w,h);
+    const accent = '#00FFCC';
+    const rgb = [0,255,204];
+    const wave = pts.map((v,i) => ({
+      x: (i/(pts.length-1))*w,
+      y: h - v*h*0.8 - h*0.06 + Math.sin(frame*0.038+i*0.8)*3.5
     }));
-
-    const grd = ctx.createLinearGradient(0, 0, 0, h);
-    grd.addColorStop(0, `rgba(${rgb.join(',')},0.38)`);
-    grd.addColorStop(1, `rgba(${rgb.join(',')},0)`);
+    const grd = ctx.createLinearGradient(0,0,0,h);
+    grd.addColorStop(0,`rgba(${rgb.join(',')},0.38)`);
+    grd.addColorStop(1,`rgba(${rgb.join(',')},0)`);
     ctx.beginPath();
-    ctx.moveTo(wave[0].x, wave[0].y);
-    for (let i = 1; i < wave.length; i++) {
-      const mx = (wave[i-1].x + wave[i].x) / 2, my = (wave[i-1].y + wave[i].y) / 2;
-      ctx.quadraticCurveTo(wave[i-1].x, wave[i-1].y, mx, my);
+    ctx.moveTo(wave[0].x,wave[0].y);
+    for(let i=1;i<wave.length;i++){
+      const mx=(wave[i-1].x+wave[i].x)/2,my=(wave[i-1].y+wave[i].y)/2;
+      ctx.quadraticCurveTo(wave[i-1].x,wave[i-1].y,mx,my);
     }
-    ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
-    ctx.fillStyle = grd; ctx.fill();
-
+    ctx.lineTo(w,h); ctx.lineTo(0,h); ctx.closePath();
+    ctx.fillStyle=grd; ctx.fill();
     ctx.beginPath();
-    ctx.moveTo(wave[0].x, wave[0].y);
-    for (let i = 1; i < wave.length; i++) {
-      const mx = (wave[i-1].x + wave[i].x) / 2, my = (wave[i-1].y + wave[i].y) / 2;
-      ctx.quadraticCurveTo(wave[i-1].x, wave[i-1].y, mx, my);
+    ctx.moveTo(wave[0].x,wave[0].y);
+    for(let i=1;i<wave.length;i++){
+      const mx=(wave[i-1].x+wave[i].x)/2,my=(wave[i-1].y+wave[i].y)/2;
+      ctx.quadraticCurveTo(wave[i-1].x,wave[i-1].y,mx,my);
     }
-    ctx.strokeStyle = accent;
-    ctx.lineWidth = 2.5;
-    ctx.shadowColor = accent;
-    ctx.shadowBlur = 10;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-
-    // Dots on peaks
-    wave.forEach((pt, i) => {
-      if (i % 4 === 0) {
-        ctx.beginPath();
-        ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = accent;
-        ctx.shadowColor = accent;
-        ctx.shadowBlur = 8;
-        ctx.fill();
-        ctx.shadowBlur = 0;
+    ctx.strokeStyle=accent; ctx.lineWidth=2.5;
+    ctx.shadowColor=accent; ctx.shadowBlur=10; ctx.stroke(); ctx.shadowBlur=0;
+    wave.forEach((pt,i)=>{
+      if(i%4===0){
+        ctx.beginPath(); ctx.arc(pt.x,pt.y,3,0,Math.PI*2);
+        ctx.fillStyle=accent; ctx.shadowColor=accent; ctx.shadowBlur=8; ctx.fill(); ctx.shadowBlur=0;
       }
     });
-
-    frame++;
-    requestAnimationFrame(draw);
+    frame++; requestAnimationFrame(draw);
   }
   draw();
 })();
-
-// ────────────────────────────────────────────────
+ 
 // AI WAVE CHART
-// ────────────────────────────────────────────────
 (function(){
   const canvas = document.getElementById('c-wave');
   function resize() {
@@ -1320,79 +1032,57 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal()
   }
   let s = resize();
   window.addEventListener('resize', () => { s = resize(); });
-
   const waves = [
-    { phase: 0, amp: 16, freq: 0.028, y: 0.5, alpha: 0.8 },
-    { phase: 1.8, amp: 11, freq: 0.034, y: 0.48, alpha: 0.55 },
-    { phase: 3.5, amp: 8, freq: 0.022, y: 0.52, alpha: 0.4 },
+    { phase:0, amp:16, freq:0.028, y:0.5, alpha:0.8, color:'#00FFCC' },
+    { phase:1.8, amp:11, freq:0.034, y:0.48, alpha:0.55, color:'#0088FF' },
+    { phase:3.5, amp:8, freq:0.022, y:0.52, alpha:0.4, color:'#66FFEE' },
   ];
   let f = 0;
-  const WAVE_COLORS = ['--accent1', '--accent2', '--accent3'];
-
   function draw() {
     const { w, h, ctx, dpr } = s;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, w, h);
-    const style = getComputedStyle(document.getElementById('shell'));
-    const colors = WAVE_COLORS.map(v => style.getPropertyValue(v).trim());
-
-    waves.forEach((wv, wi) => {
-      const color = colors[wi] || '#fff';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,w,h);
+    waves.forEach(wv => {
       ctx.beginPath();
-      for (let x = 0; x <= w; x++) {
-        const y = h * wv.y + Math.sin(x * wv.freq + f * 0.05 + wv.phase) * wv.amp;
-        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      for(let x=0;x<=w;x++){
+        const y = h*wv.y + Math.sin(x*wv.freq+f*0.05+wv.phase)*wv.amp;
+        x===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
       }
-      ctx.strokeStyle = color;
-      ctx.globalAlpha = wv.alpha;
-      ctx.lineWidth = 2;
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 7;
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-      ctx.globalAlpha = 1;
-
-      for (let x = 0; x <= w; x += 36) {
-        const y = h * wv.y + Math.sin(x * wv.freq + f * 0.05 + wv.phase) * wv.amp;
-        ctx.beginPath();
-        ctx.arc(x, y, 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = color;
-        ctx.globalAlpha = wv.alpha;
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 8;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.globalAlpha = 1;
+      ctx.strokeStyle=wv.color; ctx.globalAlpha=wv.alpha;
+      ctx.lineWidth=2; ctx.shadowColor=wv.color; ctx.shadowBlur=7;
+      ctx.stroke(); ctx.shadowBlur=0; ctx.globalAlpha=1;
+      for(let x=0;x<=w;x+=36){
+        const y = h*wv.y + Math.sin(x*wv.freq+f*0.05+wv.phase)*wv.amp;
+        ctx.beginPath(); ctx.arc(x,y,2.5,0,Math.PI*2);
+        ctx.fillStyle=wv.color; ctx.globalAlpha=wv.alpha;
+        ctx.shadowColor=wv.color; ctx.shadowBlur=8;
+        ctx.fill(); ctx.shadowBlur=0; ctx.globalAlpha=1;
       }
     });
-    f++;
-    requestAnimationFrame(draw);
+    f++; requestAnimationFrame(draw);
   }
   draw();
 })();
-
-// ────────────────────────────────────────────────
-// TILT HOVER EFFECT
-// ────────────────────────────────────────────────
+ 
+// TILT EFFECT
 (function(){
-  const TILT = 7, SCALE = 1.028, EASE = 0.1;
+  const TILT=7, SCALE=1.028, EASE=0.1;
   document.querySelectorAll('.card').forEach(card => {
-    const glow = document.createElement('div');
-    glow.className = 'card-glow';
-    card.appendChild(glow);
     let rx=0,ry=0,glowX=50,glowY=50,tRx=0,tRy=0,tGx=50,tGy=50,hov=false,raf=null,curScale=1;
     const lerp=(a,b,t)=>a+(b-a)*t;
+    let glow = card.querySelector('.card-glow');
+    if(!glow){glow=document.createElement('div');glow.className='card-glow';card.appendChild(glow);}
     function anim(){
       rx=lerp(rx,tRx,EASE); ry=lerp(ry,tRy,EASE);
       glowX=lerp(glowX,tGx,EASE); glowY=lerp(glowY,tGy,EASE);
       curScale=lerp(curScale,hov?SCALE:1,EASE);
       card.style.transform=`perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) scale(${curScale}) translateZ(0)`;
-      glow.style.left=glowX+'px'; glow.style.top=glowY+'px';
+      if(glow){glow.style.left=glowX+'px';glow.style.top=glowY+'px';}
       const settled=Math.abs(rx)<0.01&&Math.abs(ry)<0.01&&Math.abs(curScale-(hov?SCALE:1))<0.0005;
-      raf = settled ? null : requestAnimationFrame(anim);
+      raf=settled?null:requestAnimationFrame(anim);
     }
-    function go(){ if(!raf) raf=requestAnimationFrame(anim); }
-    card.addEventListener('mouseenter',()=>{ hov=true; card.classList.add('hovered'); go(); });
+    function go(){if(!raf)raf=requestAnimationFrame(anim);}
+    card.addEventListener('mouseenter',()=>{hov=true;go();});
     card.addEventListener('mousemove',e=>{
       const r=card.getBoundingClientRect();
       const nx=(e.clientX-r.left-r.width/2)/(r.width/2);
@@ -1400,9 +1090,16 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal()
       tRy=nx*TILT; tRx=-ny*TILT;
       tGx=e.clientX-r.left; tGy=e.clientY-r.top; go();
     });
-    card.addEventListener('mouseleave',()=>{ hov=false; tRx=0; tRy=0; card.classList.remove('hovered'); go(); });
+    card.addEventListener('mouseleave',()=>{hov=false;tRx=0;tRy=0;go();});
   });
 })();
+ 
+// NOTIFICAÇÃO DEMO
+setTimeout(() => showToast('🔥 Lead quente! João Silva — score 89'), 3000);
+ 
+// LOAD & REFRESH
+loadDashboard();
+setInterval(loadDashboard, 30000);
 </script>
 </body>
 </html>
