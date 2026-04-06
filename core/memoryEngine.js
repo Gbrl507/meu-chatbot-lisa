@@ -28,6 +28,11 @@ function memoryEngine(currentMemory = {}, message = '', state = {}) {
   if (state.awareness) {
     updatedMemory.currentAwareness = state.awareness;
   }
+  // 5. Captura de Nome do Lead
+  const nameMatch = message.match(/(?:me chamo|meu nome é|sou o|sou a|pode me chamar de)\s+([A-ZÀ-Ú][a-záàâãéêíóôõúç]+)/i);
+  if (nameMatch) {
+    updatedMemory.name = nameMatch[1];
+  }
 
   return updatedMemory;
 }
