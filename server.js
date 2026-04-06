@@ -325,7 +325,7 @@ app.post('/chat', async (req, res) => {
     const completion = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [{ role: 'system', content: systemPrompt }, ...userHistories[userId]],
-      temperature: 0.5
+      temperature: 0.2
     });
 
     const reply = completion?.choices?.[0]?.message?.content;
