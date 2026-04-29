@@ -362,5 +362,70 @@ app.post('/chat', async (req, res) => {
     res.status(500).json({ error: 'Erro interno' });
   }
 });
+// ─── WEBHOOK WHATSAPP ─────────────────────────────────────────────────────────
+app.post('/webhook/whatsapp', async (req, res) => {
+  try {
+    const body = req.body;
+
+    // Ignora mensagens que não sejam de texto
+    if (!body?.data?.message?.conversation) return res.sendStatus(200);
+
+    const message = body.data.message.conversation;
+    const from = body.data.key?.remoteJid;
+    const fromMe = body.data.key?.fromMe;
+
+    // Ignora mensagens enviadas pelo próprio número
+    if (fromMe) return res.sendStatus(200);
+
+    console.log(`📱 WhatsApp de ${from}: ${message}`);
+
+    // Busca o tenant padrão
+    const tenant = await Tenant.findOne();
+    if (!tenant) return res.sendStatus(200);
+
+    const userId = from;
+    const slug = tenant.slug;
+
+    // Processa com a Kira
+    pushToHistory(userId, 'user', message);
+    const state = stateDetector(message);
+    userMemory[userId] = memoryEngine(userMemory[userId] || {}, message, state);
+    saveLocalData();
+    const score = scoringEngine({ message, state: state.awareness, memory: userMemory[userId], history: userHistories[userId] });
+    const strategy = strategyEngine(state, score, userHistories[userId]);
+
+    const systemPrompt = promptComposer({ userId, memory: userMemory[userId], state, strategy, score, context: tenant.trainingData, role: tenant.systemPromptBase, isOwner: false, tenantName: tenant.name });
+
+    const completion = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'system', content: systemPrompt }, ...userHistories[userId]],
+      temperature: 0.2
+    });
+
+    const reply = completion?.choices?.[0]?.message?.content;
+    pushToHistory(userId, 'assistant', reply);
+
+    // Envia resposta via Evolution API
+    await fetch(`${process.env.EVOLUTION_API_URL}/message/sendText/kira`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': process.env.EVOLUTION_API_KEY
+      },
+      body: JSON.stringify({
+        number: from,
+        options: { delay: 1000 },
+        textMessage: { text: reply }
+      })
+    });
+
+    console.log(`✅ Kira respondeu para ${from}: ${reply}`);
+    res.sendStatus(200);
+
+  } catch (err) {
+    console.error('❌ Webhook WhatsApp:', err);
+    res.sendStatus(500);
+  }
+});
 
 app.listen(PORT, () => console.log(`🚀 KIRA ON - PORTA ${PORT}`));
