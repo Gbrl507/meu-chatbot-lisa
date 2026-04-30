@@ -420,7 +420,6 @@ const sendResponse = await fetch(`${process.env.EVOLUTION_API_URL}/message/sendT
 const sendResult = await sendResponse.json();
 console.log(`📤 Envio resultado:`, JSON.stringify(sendResult));
 
-...
 console.log(`✅ Kira respondeu para ${from}: ${reply}`);
 res.sendStatus(200);
 
