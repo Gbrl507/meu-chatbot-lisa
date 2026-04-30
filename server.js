@@ -401,26 +401,28 @@ app.post('/webhook/whatsapp', async (req, res) => {
       messages: [{ role: 'system', content: systemPrompt }, ...userHistories[userId]],
       temperature: 0.2
     });
+const reply = completion?.choices?.[0]?.message?.content;
+pushToHistory(userId, 'assistant', reply);
 
-    const reply = completion?.choices?.[0]?.message?.content;
-    pushToHistory(userId, 'assistant', reply);
+// Envia resposta via Evolution API
+const sendResponse = await fetch(`${process.env.EVOLUTION_API_URL}/message/sendText/kira`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'apikey': process.env.EVOLUTION_API_KEY
+  },
+  body: JSON.stringify({
+    number: from,
+    options: { delay: 1000 },
+    textMessage: { text: reply }
+  })
+});
+const sendResult = await sendResponse.json();
+console.log(`📤 Envio resultado:`, JSON.stringify(sendResult));
 
-    // Envia resposta via Evolution API
-    await fetch(`${process.env.EVOLUTION_API_URL}/message/sendText/kira`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': process.env.EVOLUTION_API_KEY
-      },
-      body: JSON.stringify({
-        number: from,
-        options: { delay: 1000 },
-        textMessage: { text: reply }
-      })
-    });
-
-    console.log(`✅ Kira respondeu para ${from}: ${reply}`);
-    res.sendStatus(200);
+...
+console.log(`✅ Kira respondeu para ${from}: ${reply}`);
+res.sendStatus(200);
 
   } catch (err) {
     console.error('❌ Webhook WhatsApp:', err);
