@@ -371,7 +371,7 @@ app.post('/webhook/whatsapp', async (req, res) => {
     if (!body?.data?.message?.conversation) return res.sendStatus(200);
 
     const message = body.data.message.conversation;
-    const from = body.data.key?.remoteJid;
+    const from = body.data.key?.remoteJid?.replace('@lid', '@s.whatsapp.net') || body.data.key?.remoteJid;
     const fromMe = body.data.key?.fromMe;
 
     // Ignora mensagens enviadas pelo próprio número
