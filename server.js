@@ -31,7 +31,7 @@ const onboardingSessions = {};
 console.log('TIPO DO SCRAPER:', typeof scrapeWebsite);
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
-const DB = 'mongodb+srv://luisgabriel5073234_db_user:KERZqog2jEOQRxKB@cluster0.1ya69kg.mongodb.net/lisa_db?retryWrites=true&w=majority';
+const DB = process.env.MONGO_URI;
 const PORT = process.env.PORT || 3000;
 
 mongoose.connect(DB)
