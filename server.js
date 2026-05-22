@@ -60,11 +60,14 @@ async function callGemini(systemPrompt, messages, temperature = 0.3) {
       model: 'gemini-2.0-flash',
       systemInstruction: systemPrompt
     });
-    const history = messages.slice(0, -1).map(m => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }]
-    }));
-    const lastMsg = messages[messages.length - 1].content;
+    const history = messages.slice(0, -1)
+      .filter(m => m.content && typeof m.content === 'string' && m.content.trim() !== '')
+      .map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+      }));
+    const lastMsg = messages[messages.length - 1]?.content || '';
+    if (!lastMsg) return null;
     const chat = model.startChat({ history, generationConfig: { temperature } });
     const result = await chat.sendMessage(lastMsg);
     return result.response.text();
