@@ -129,7 +129,8 @@ app.post('/onboarding', async (req, res) => {
       onboardingSessions[userId] = {
         data: JSON.parse(JSON.stringify(ONBOARDING_FIELDS)),
         step: 'collecting',
-        awaitingConfirmation: false
+        awaitingConfirmation: false,
+        history: []
       };
       return res.json({ ok: true, reply: `Oi! Sou a KIRA 👋\nVou configurar sua IA de vendas em menos de 5 minutos.\nQual é o nome do seu negócio?`, step: 'collecting', progress: 0 });
     }
@@ -144,7 +145,9 @@ app.post('/onboarding', async (req, res) => {
         const data = session.data;
         const slug = generateSlug(data.businessName.value);
         const novoTenant = new Tenant({
-          slug, name: data.businessName.value, nicho: data.product.value,
+          slug,
+          name: data.businessName.value,
+          nicho: data.product.value,
           systemPromptBase: generateSystemPrompt(data),
           trainingData: `Negócio: ${data.businessName.value}\nProduto: ${data.product.value}\nValor: R$ ${data.price.value}\nPúblico: ${data.audience.value}`,
           contactInfo: { whatsapp: data.whatsapp?.value || '' },
@@ -154,7 +157,12 @@ app.post('/onboarding', async (req, res) => {
         if (!global.ownerSessions) global.ownerSessions = {};
         global.ownerSessions[userId] = { slug, name: data.businessName.value, isOwner: true };
         delete onboardingSessions[userId];
-        return res.json({ ok: true, reply: `✅ Prontinho! 🚀\n\nEaê! Tudo configurado — sou a Kira e já sei tudo sobre o ${data.businessName.value}!\n\n🔗 Link dos seus clientes:\nhttps://meu-chatbot-lisa.onrender.com/?tenant=${slug}\n\nAí, como posso te chamar? 😊`, step: 'complete', tenant: { slug, name: data.businessName.value } });
+        return res.json({
+          ok: true,
+          reply: `✅ Prontinho! 🚀\n\nTudo configurado — sou a Kira e já sei tudo sobre o ${data.businessName.value}!\n\n🔗 Link dos seus clientes:\nhttps://meu-chatbot-lisa.onrender.com/?tenant=${slug}\n\nComo posso te chamar? 😊`,
+          step: 'complete',
+          tenant: { slug, name: data.businessName.value }
+        });
       } else if (denied) {
         session.awaitingConfirmation = false;
         return res.json({ ok: true, reply: "Tudo bem! O que precisa corrigir?", step: 'collecting' });
@@ -163,12 +171,12 @@ app.post('/onboarding', async (req, res) => {
       }
     }
 
-    // Extracção inteligente via Gemini
+    // ── Extração inteligente via Gemini ──
     try {
       const raw = await callGeminiJSON(
-        `Você é um extractor de dados de negócio. 
-Analise a mensagem e extraia informações de negócio.
-Responda APENAS em JSON válido sem markdown:
+        `Você é um extractor de dados de negócio.
+Analise a mensagem e extraia informações.
+Responda APENAS JSON válido, sem markdown, sem texto extra:
 {
   "businessName": "nome do negócio ou null",
   "product": "produto ou serviço ou null",
@@ -176,27 +184,39 @@ Responda APENAS em JSON válido sem markdown:
   "audience": "público-alvo ou null"
 }
 Regras:
-- Se não houver informação para um campo coloque null
+- Se não houver informação coloque null (sem aspas no null)
 - Não invente dados que não estão na mensagem
-- businessName: nome da empresa/negócio/clínica/escritório
-- product: o que vende ou faz — serviço ou produto
-- price: qualquer menção de valor, preço, honorário
-- audience: para quem vende, público, pacientes, clientes`,
+- businessName: nome da empresa, negócio, clínica, escritório
+- product: o que vende ou faz
+- price: qualquer valor monetário mencionado
+- audience: para quem vende`,
         message
       );
-      const clean = raw.replace(/```json|```/g, '').trim();
-      const extracted = JSON.parse(clean);
 
-      if (extracted.businessName && !session.data.businessName.extracted)
+      let extracted = {};
+      try {
+        const clean = raw
+          .replace(/```json/g, '')
+          .replace(/```/g, '')
+          .replace(/[\u0000-\u001F\u007F]/g, ' ')
+          .trim();
+        extracted = JSON.parse(clean);
+      } catch(parseErr) {
+        const jsonMatch = raw.match(/\{[\s\S]*\}/);
+        if (jsonMatch) extracted = JSON.parse(jsonMatch[0]);
+      }
+
+      if (extracted.businessName && extracted.businessName !== 'null' && !session.data.businessName.extracted)
         session.data.businessName = { ...session.data.businessName, extracted: true, value: extracted.businessName };
-      if (extracted.product && !session.data.product.extracted)
+      if (extracted.product && extracted.product !== 'null' && !session.data.product.extracted)
         session.data.product = { ...session.data.product, extracted: true, value: extracted.product };
-      if (extracted.price && !session.data.price.extracted)
+      if (extracted.price && extracted.price !== 'null' && !session.data.price.extracted)
         session.data.price = { ...session.data.price, extracted: true, value: extracted.price };
-      if (extracted.audience && !session.data.audience.extracted)
+      if (extracted.audience && extracted.audience !== 'null' && !session.data.audience.extracted)
         session.data.audience = { ...session.data.audience, extracted: true, value: extracted.audience };
+
     } catch(e) {
-      session.data = detectOnboardingData(message, session.data);
+      console.error('❌ Extração Gemini falhou:', e.message);
     }
 
     const missing = getMissingFields(session.data);
@@ -208,7 +228,7 @@ Regras:
       return res.json({ ok: true, reply: generateSummary(session.data), step: 'awaiting_confirmation', progress: 100 });
     }
 
-    // Kira responde naturalmente via Gemini
+    // ── Kira responde naturalmente via Gemini ──
     const systemOnboarding = `Você é Kira — IA de vendas calorosa e brasileira.
 Está configurando o negócio de um novo cliente.
 
@@ -221,18 +241,16 @@ DADOS JÁ RECOLHIDOS:
 CAMPO QUE PRECISA AGORA: ${missing[0]}
 
 MISSÃO: Responda de forma natural e calorosa.
-→ Fala como brasileira — calorosa, directa, profissional
-→ NUNCA use "meu amor", "querido", "mozão" no início da conversa
+→ Fala como brasileira — calorosa, direta, profissional
+→ NUNCA use "meu amor", "querido", "mozão"
 → Se já extraiu algo — confirme brevemente com entusiasmo
 → Faça UMA pergunta para o próximo campo
-→ Aceite qualquer forma de resposta
 → NUNCA peça para repetir
 → Máximo 2 frases`;
 
     const historyMsgs = [...(session.history || []).slice(-8), { role: 'user', content: message }];
     const reply = await callGemini(systemOnboarding, historyMsgs, 0.3) || getNextQuestion(missing);
 
-    if (!session.history) session.history = [];
     session.history.push({ role: 'user', content: message });
     session.history.push({ role: 'assistant', content: reply });
 
@@ -322,7 +340,6 @@ app.post('/chat', async (req, res) => {
     await new Promise(resolve => setTimeout(resolve, silenceDuration));
 
     const systemPrompt = promptComposer({ userId, memory: userMemory[userId], state, strategy, score, context: tenant.trainingData, role: tenant.systemPromptBase, isOwner, tenantName: tenant.name });
-
     const reply = await callGemini(systemPrompt, userHistories[userId], 0.2);
     pushToHistory(userId, 'assistant', reply);
 
