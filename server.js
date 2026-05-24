@@ -248,11 +248,12 @@ MISSÃO: Responda de forma natural e calorosa.
 → NUNCA peça para repetir
 → Máximo 2 frases`;
 
-    const historyMsgs = [...(session.history || []).slice(-8), { role: 'user', content: message }];
-    const reply = await callGemini(systemOnboarding, historyMsgs, 0.3) || getNextQuestion(missing);
+  session.history.push({ role: 'user', content: message });
 
-    session.history.push({ role: 'user', content: message });
-    session.history.push({ role: 'assistant', content: reply });
+const historyMsgs = session.history.slice(-10);
+const reply = await callGemini(systemOnboarding, historyMsgs, 0.3) || getNextQuestion(missing);
+
+session.history.push({ role: 'assistant', content: reply });
 
     return res.json({ ok: true, reply, step: 'collecting', progress, missing, _lastExtracted: totalExtracted });
   } catch (err) {
