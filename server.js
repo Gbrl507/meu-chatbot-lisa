@@ -18,7 +18,6 @@ const Tenant = require('./models/Tenant');
 const Conversation = require('./models/Conversation');
 const {
   ONBOARDING_FIELDS,
-  detectOnboardingData,
   getMissingFields,
   getNextQuestion,
   generateSummary,
@@ -77,21 +76,6 @@ async function callGemini(systemPrompt, messages, temperature = 0.3) {
   }
 }
 
-async function callGeminiJSON(systemPrompt, userMessage) {
-  try {
-    const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.0-flash',
-      systemInstruction: systemPrompt
-    });
-    const chat = model.startChat({ generationConfig: { temperature: 0 } });
-    const result = await chat.sendMessage(userMessage);
-    return result.response.text();
-  } catch(e) {
-    console.error('❌ Gemini JSON error:', e);
-    return '{}';
-  }
-}
-
 // ─── MEMÓRIA LOCAL ────────────────────────────────────────────────────────────
 const MEMORY_FILE = path.join(__dirname, 'user_memory.json');
 const HISTORY_FILE = path.join(__dirname, 'user_histories.json');
@@ -128,7 +112,6 @@ app.post('/onboarding', async (req, res) => {
     if (!onboardingSessions[userId]) {
       onboardingSessions[userId] = {
         data: JSON.parse(JSON.stringify(ONBOARDING_FIELDS)),
-        step: 'collecting',
         awaitingConfirmation: false,
         history: []
       };
@@ -137,6 +120,7 @@ app.post('/onboarding', async (req, res) => {
 
     const session = onboardingSessions[userId];
 
+    // ── Confirmação final ──
     if (session.awaitingConfirmation) {
       const msg = message.toLowerCase();
       const confirmed = ['sim','yes','correto','certo','perfeito','isso','exato','ok','pode','confirmo'].some(w => msg.includes(w));
@@ -171,93 +155,91 @@ app.post('/onboarding', async (req, res) => {
       }
     }
 
-    // ── Extração inteligente via Gemini ──
-    try {
-      const raw = await callGeminiJSON(
-        `Você é um extractor de dados de negócio.
-Analise a mensagem e extraia informações.
-Responda APENAS JSON válido, sem markdown, sem texto extra:
+    // ── UMA chamada Gemini: extrai dados + responde naturalmente ──
+    session.history.push({ role: 'user', content: message });
+
+    const systemOnboarding = `Você é Kira — IA de vendas brasileira, calorosa e natural.
+Está fazendo onboarding de um novo cliente para configurar a IA de vendas dele.
+
+DADOS JÁ COLETADOS:
+- Nome negócio: ${session.data.businessName.value || 'não informado'}
+- Produto: ${session.data.product.value || 'não informado'}
+- Preço: ${session.data.price.value || 'não informado'}
+- Público: ${session.data.audience.value || 'não informado'}
+
+CAMPOS QUE FALTAM: ${getMissingFields(session.data).join(', ') || 'nenhum'}
+
+SUA TAREFA — responda em JSON com este formato EXATO:
 {
-  "businessName": "nome do negócio ou null",
-  "product": "produto ou serviço ou null",
-  "price": "preço ou valor ou null",
-  "audience": "público-alvo ou null"
+  "extracted": {
+    "businessName": "valor extraído ou null",
+    "product": "valor extraído ou null",
+    "price": "valor extraído ou null",
+    "audience": "valor extraído ou null"
+  },
+  "reply": "sua resposta natural aqui"
 }
-Regras:
-- Se não houver informação coloque null (sem aspas no null)
-- Não invente dados que não estão na mensagem
-- businessName: nome da empresa, negócio, clínica, escritório
-- product: o que vende ou faz
-- price: qualquer valor monetário mencionado
-- audience: para quem vende`,
-        message
-      );
 
-      let extracted = {};
+REGRAS DE EXTRAÇÃO:
+- Extrai APENAS o que o usuário disse nesta mensagem
+- Se não mencionou um campo, coloca null
+- Não repete campos já coletados
+
+REGRAS DE RESPOSTA:
+- Seja natural, calorosa, brasileira
+- Se extraiu algo novo, confirme brevemente com entusiasmo
+- Faça UMA pergunta para o próximo campo que falta
+- Se o usuário está só conversando (oi, tudo bem), responda naturalmente e pergunte o próximo campo
+- NUNCA use "meu amor", "querido", "mozão"
+- Máximo 2 frases
+- Responda APENAS o JSON, nada mais`;
+
+    const raw = await callGemini(systemOnboarding, session.history, 0.3);
+
+    let reply = getNextQuestion(getMissingFields(session.data));
+    
+    if (raw) {
       try {
-        const clean = raw
-          .replace(/```json/g, '')
-          .replace(/```/g, '')
-          .replace(/[\u0000-\u001F\u007F]/g, ' ')
-          .trim();
-        extracted = JSON.parse(clean);
-      } catch(parseErr) {
-        const jsonMatch = raw.match(/\{[\s\S]*\}/);
-        if (jsonMatch) extracted = JSON.parse(jsonMatch[0]);
+        const clean = raw.replace(/```json/g, '').replace(/```/g, '').trim();
+        const jsonMatch = clean.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          
+          // Atualiza dados extraídos
+          if (parsed.extracted) {
+            const e = parsed.extracted;
+            if (e.businessName && e.businessName !== 'null' && !session.data.businessName.extracted)
+              session.data.businessName = { ...session.data.businessName, extracted: true, value: e.businessName };
+            if (e.product && e.product !== 'null' && !session.data.product.extracted)
+              session.data.product = { ...session.data.product, extracted: true, value: e.product };
+            if (e.price && e.price !== 'null' && !session.data.price.extracted)
+              session.data.price = { ...session.data.price, extracted: true, value: e.price };
+            if (e.audience && e.audience !== 'null' && !session.data.audience.extracted)
+              session.data.audience = { ...session.data.audience, extracted: true, value: e.audience };
+          }
+
+          if (parsed.reply) reply = parsed.reply;
+        }
+      } catch(e) {
+        // Se falhou o parse, usa o raw como reply direto
+        if (raw.length < 500 && !raw.includes('{')) reply = raw.trim();
       }
-
-      if (extracted.businessName && extracted.businessName !== 'null' && !session.data.businessName.extracted)
-        session.data.businessName = { ...session.data.businessName, extracted: true, value: extracted.businessName };
-      if (extracted.product && extracted.product !== 'null' && !session.data.product.extracted)
-        session.data.product = { ...session.data.product, extracted: true, value: extracted.product };
-      if (extracted.price && extracted.price !== 'null' && !session.data.price.extracted)
-        session.data.price = { ...session.data.price, extracted: true, value: extracted.price };
-      if (extracted.audience && extracted.audience !== 'null' && !session.data.audience.extracted)
-        session.data.audience = { ...session.data.audience, extracted: true, value: extracted.audience };
-
-    } catch(e) {
-      console.error('❌ Extração Gemini falhou:', e.message);
     }
+
+    session.history.push({ role: 'assistant', content: reply });
 
     const missing = getMissingFields(session.data);
     const progress = Math.round(((4 - missing.length) / 4) * 100);
-    const totalExtracted = Object.values(session.data).filter(f => f.extracted).length;
 
     if (missing.length === 0) {
       session.awaitingConfirmation = true;
-      return res.json({ ok: true, reply: generateSummary(session.data), step: 'awaiting_confirmation', progress: 100 });
+      const confirmReply = generateSummary(session.data);
+      session.history[session.history.length - 1].content = confirmReply;
+      return res.json({ ok: true, reply: confirmReply, step: 'awaiting_confirmation', progress: 100 });
     }
 
-    // ── Kira responde naturalmente via Gemini ──
-    const systemOnboarding = `Você é Kira — IA de vendas calorosa e brasileira.
-Está configurando o negócio de um novo cliente.
+    return res.json({ ok: true, reply, step: 'collecting', progress, missing });
 
-DADOS JÁ RECOLHIDOS:
-- Nome negócio: ${session.data.businessName.value || 'não informado ainda'}
-- Produto: ${session.data.product.value || 'não informado ainda'}
-- Preço: ${session.data.price.value || 'não informado ainda'}
-- Público: ${session.data.audience.value || 'não informado ainda'}
-
-CAMPO QUE PRECISA AGORA: ${missing[0]}
-
-MISSÃO: Responda de forma natural e calorosa.
-→ Fala como brasileira — calorosa, direta, profissional
-→ NUNCA use "meu amor", "querido", "mozão"
-→ Se já extraiu algo — confirme brevemente com entusiasmo
-→ Faça UMA pergunta para o próximo campo
-→ NUNCA peça para repetir
-→ Máximo 2 frases`;
-
-  session.history.push({ role: 'user', content: message });
-
-const historyMsgs = session.history.length > 0 
-  ? session.history.slice(-10)
-  : [{ role: 'user', content: message }];
-const reply = await callGemini(systemOnboarding, historyMsgs, 0.3) || `Que legal! Ainda não te conheço direito — qual é o nome do seu negócio? 😊`;
-
-session.history.push({ role: 'assistant', content: reply });
-
-    return res.json({ ok: true, reply, step: 'collecting', progress, missing, _lastExtracted: totalExtracted });
   } catch (err) {
     console.error('❌ Onboarding:', err);
     res.status(500).json({ error: 'Erro no onboarding' });
