@@ -250,8 +250,10 @@ MISSÃO: Responda de forma natural e calorosa.
 
   session.history.push({ role: 'user', content: message });
 
-const historyMsgs = session.history.slice(-10);
-const reply = await callGemini(systemOnboarding, historyMsgs, 0.3) || getNextQuestion(missing);
+const historyMsgs = session.history.length > 0 
+  ? session.history.slice(-10)
+  : [{ role: 'user', content: message }];
+const reply = await callGemini(systemOnboarding, historyMsgs, 0.3) || `Que legal! Ainda não te conheço direito — qual é o nome do seu negócio? 😊`;
 
 session.history.push({ role: 'assistant', content: reply });
 
