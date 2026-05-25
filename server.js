@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const fs = require('fs');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 
 const scoringEngine = require('./core/scoringEngine.js');
 const memoryEngine = require('./core/memoryEngine.js');
@@ -26,10 +27,11 @@ const {
 } = require('./core/onboardingEngine.js');
 
 const onboardingSessions = {};
-
 console.log('TIPO DO SCRAPER:', typeof scrapeWebsite);
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
+const GROQ_KEY = process.env.GROQ_API_KEY;
+const DEEPSEEK_KEY = process.env.DEEPSEEK_API_KEY;
 const DB = process.env.MONGO_URI;
 const PORT = process.env.PORT || 3000;
 
@@ -50,10 +52,33 @@ app.get('/configurar', (req, res) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ─── GEMINI SETUP ─────────────────────────────────────────────────────────────
+// ─── LLM SETUP ────────────────────────────────────────────────────────────────
 const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+const groq = new Groq({ apiKey: GROQ_KEY });
 
-async function callGemini(systemPrompt, messages, temperature = 0.3) {
+// 3º fallback — Groq
+async function callGroq(systemPrompt, messages, temperature = 0.3) {
+  try {
+    const history = messages.map(m => ({
+      role: m.role === 'assistant' ? 'assistant' : 'user',
+      content: m.content
+    }));
+    const completion = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'system', content: systemPrompt }, ...history],
+      temperature,
+      max_tokens: 1024
+    });
+    console.log('⚡ Groq respondeu');
+    return completion.choices[0]?.message?.content || null;
+  } catch(e) {
+    console.error('❌ Groq error:', e.message);
+    return null;
+  }
+}
+
+// 2º fallback — Gemini
+async function callGeminiDirect(systemPrompt, messages, temperature = 0.3) {
   try {
     const model = genAI.getGenerativeModel({ 
       model: 'gemini-2.0-flash',
@@ -69,10 +94,49 @@ async function callGemini(systemPrompt, messages, temperature = 0.3) {
     if (!lastMsg) return null;
     const chat = model.startChat({ history, generationConfig: { temperature } });
     const result = await chat.sendMessage(lastMsg);
+    console.log('✨ Gemini respondeu');
     return result.response.text();
   } catch(e) {
-    console.error('❌ Gemini error:', e);
-    return null;
+    if (e.status === 429) {
+      console.log('⚠️ Gemini limite — usando Groq');
+      return await callGroq(systemPrompt, messages, temperature);
+    }
+    console.error('❌ Gemini error:', e.message);
+    return await callGroq(systemPrompt, messages, temperature);
+  }
+}
+
+// 1º principal — DeepSeek com fallback para Gemini → Groq
+async function callGemini(systemPrompt, messages, temperature = 0.3) {
+  try {
+    const history = messages.map(m => ({
+      role: m.role === 'assistant' ? 'assistant' : 'user',
+      content: m.content
+    }));
+    const response = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${DEEPSEEK_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [{ role: 'system', content: systemPrompt }, ...history],
+        temperature,
+        max_tokens: 1024
+      })
+    });
+    if (!response.ok) {
+      const err = await response.json();
+      console.log(`⚠️ DeepSeek erro ${response.status} — usando Gemini`);
+      return await callGeminiDirect(systemPrompt, messages, temperature);
+    }
+    const data = await response.json();
+    console.log('🧠 DeepSeek respondeu');
+    return data.choices[0]?.message?.content || await callGeminiDirect(systemPrompt, messages, temperature);
+  } catch(e) {
+    console.log('⚠️ DeepSeek falhou — usando Gemini');
+    return await callGeminiDirect(systemPrompt, messages, temperature);
   }
 }
 
@@ -120,7 +184,6 @@ app.post('/onboarding', async (req, res) => {
 
     const session = onboardingSessions[userId];
 
-    // ── Confirmação final ──
     if (session.awaitingConfirmation) {
       const msg = message.toLowerCase();
       const confirmed = ['sim','yes','correto','certo','perfeito','isso','exato','ok','pode','confirmo'].some(w => msg.includes(w));
@@ -155,7 +218,6 @@ app.post('/onboarding', async (req, res) => {
       }
     }
 
-    // ── UMA chamada Gemini: extrai dados + responde naturalmente ──
     session.history.push({ role: 'user', content: message });
 
     const systemOnboarding = `Você é Kira — IA de vendas brasileira, calorosa e natural.
@@ -195,17 +257,14 @@ REGRAS DE RESPOSTA:
 - Responda APENAS o JSON, nada mais`;
 
     const raw = await callGemini(systemOnboarding, session.history, 0.3);
-
     let reply = getNextQuestion(getMissingFields(session.data));
-    
+
     if (raw) {
       try {
         const clean = raw.replace(/```json/g, '').replace(/```/g, '').trim();
         const jsonMatch = clean.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]);
-          
-          // Atualiza dados extraídos
           if (parsed.extracted) {
             const e = parsed.extracted;
             if (e.businessName && e.businessName !== 'null' && !session.data.businessName.extracted)
@@ -217,11 +276,9 @@ REGRAS DE RESPOSTA:
             if (e.audience && e.audience !== 'null' && !session.data.audience.extracted)
               session.data.audience = { ...session.data.audience, extracted: true, value: e.audience };
           }
-
           if (parsed.reply) reply = parsed.reply;
         }
       } catch(e) {
-        // Se falhou o parse, usa o raw como reply direto
         if (raw.length < 500 && !raw.includes('{')) reply = raw.trim();
       }
     }
@@ -277,7 +334,6 @@ app.get('/dashboard/stats', async (req, res) => {
       ? Math.round(conversations.reduce((acc, c) => acc + (c.score || 0), 0) / totalConversas) : 0;
     const receita = vendasFechadas * 497;
     const taxa = totalConversas > 0 ? Math.round((leadsQualificados / totalConversas) * 100) : 0;
-
     const leads = conversations
       .sort((a, b) => b.score - a.score).slice(0, 10)
       .map(c => ({
@@ -285,7 +341,6 @@ app.get('/dashboard/stats', async (req, res) => {
         msg: c.messages?.slice(-1)[0]?.content?.substring(0, 60) + '...' || '',
         status: c.status || 'cold', messages: c.messages?.slice(-6) || []
       }));
-
     const timeline = conversations
       .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 5)
       .map(c => {
@@ -293,7 +348,6 @@ app.get('/dashboard/stats', async (req, res) => {
         const time = diff < 60 ? `${diff}min` : `${Math.round(diff/60)}h`;
         return { ico: c.status === 'hot' ? '🔥' : c.status === 'warm' ? '💙' : '❄️', name: c.leadName || 'Lead', meta: `Score ${c.score} · ${c.status}`, time };
       });
-
     res.json({ totalConversas, leadsQualificados, vendasFechadas, scoreMedio, receita, taxa, interessados: conversations.filter(c => c.score >= 60).length, leads, timeline });
   } catch (err) {
     console.error('❌ Dashboard stats:', err);
@@ -309,7 +363,6 @@ app.post('/chat', async (req, res) => {
     const tenant = await Tenant.findOne({ slug });
     if (!tenant) return res.status(404).json({ error: "Tenant não encontrado." });
     const isOwner = tenant.ownerUserId === userId;
-
     pushToHistory(userId, 'user', message);
     const state = stateDetector(message);
     userMemory[userId] = memoryEngine(userMemory[userId] || {}, message, state);
@@ -317,17 +370,13 @@ app.post('/chat', async (req, res) => {
     const score = scoringEngine({ message, state: state.awareness, memory: userMemory[userId], history: userHistories[userId] });
     const strategy = strategyEngine(state, score, userHistories[userId]);
     const silenceDuration = silence(state.profile, state.awareness);
-
     if (silenceDuration > 15000 && state.resistance) {
       return res.json({ ok: true, reply: "Estou analisando sua situação..." });
     }
-
     await new Promise(resolve => setTimeout(resolve, silenceDuration));
-
     const systemPrompt = promptComposer({ userId, memory: userMemory[userId], state, strategy, score, context: tenant.trainingData, role: tenant.systemPromptBase, isOwner, tenantName: tenant.name });
     const reply = await callGemini(systemPrompt, userHistories[userId], 0.2);
     pushToHistory(userId, 'assistant', reply);
-
     if (!isOwner) {
       try {
         const leadName = userMemory[userId]?.name || 'Lead';
@@ -341,7 +390,6 @@ app.post('/chat', async (req, res) => {
         );
       } catch(e) { console.error('❌ Conversation save:', e); }
     }
-
     res.json({ ok: true, reply });
   } catch (err) {
     console.error('❌ Chat:', err);
@@ -354,30 +402,23 @@ app.post('/webhook/whatsapp', async (req, res) => {
   try {
     const body = req.body;
     if (!body?.data?.message?.conversation) return res.sendStatus(200);
-
     const message = body.data.message.conversation;
     const from = body.data.key?.remoteJid?.replace('@lid', '@s.whatsapp.net') || body.data.key?.remoteJid;
     const fromMe = body.data.key?.fromMe;
     if (fromMe) return res.sendStatus(200);
-
     console.log(`📱 WhatsApp de ${from}: ${message}`);
-
     const tenant = await Tenant.findOne();
     if (!tenant) return res.sendStatus(200);
-
     const userId = from;
-
     pushToHistory(userId, 'user', message);
     const state = stateDetector(message);
     userMemory[userId] = memoryEngine(userMemory[userId] || {}, message, state);
     saveLocalData();
     const score = scoringEngine({ message, state: state.awareness, memory: userMemory[userId], history: userHistories[userId] });
     const strategy = strategyEngine(state, score, userHistories[userId]);
-
     const systemPrompt = promptComposer({ userId, memory: userMemory[userId], state, strategy, score, context: tenant.trainingData, role: tenant.systemPromptBase, isOwner: false, tenantName: tenant.name });
     const reply = await callGemini(systemPrompt, userHistories[userId], 0.2);
     pushToHistory(userId, 'assistant', reply);
-
     const sendResponse = await fetch(`${process.env.EVOLUTION_API_URL}/message/sendText/kira-nakira`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': process.env.EVOLUTION_API_KEY },
