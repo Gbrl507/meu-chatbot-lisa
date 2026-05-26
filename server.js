@@ -419,7 +419,7 @@ app.post('/webhook/whatsapp', async (req, res) => {
     const systemPrompt = promptComposer({ userId, memory: userMemory[userId], state, strategy, score, context: tenant.trainingData, role: tenant.systemPromptBase, isOwner: false, tenantName: tenant.name });
     const reply = await callGemini(systemPrompt, userHistories[userId], 0.2);
     pushToHistory(userId, 'assistant', reply);
-    const sendResponse = await fetch(`${process.env.EVOLUTION_API_URL}/message/sendText/kira-nakira`, {
+    const sendResponse = await fetch(`${process.env.EVOLUTION_API_URL}/message/sendText/kira-nakira2`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': process.env.EVOLUTION_API_KEY },
       body: JSON.stringify({ number: from, options: { delay: 1000 }, textMessage: { text: reply } })
