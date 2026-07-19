@@ -422,7 +422,7 @@ app.post('/webhook/whatsapp', async (req, res) => {
     const sendResponse = await fetch(`${process.env.EVOLUTION_API_URL}/message/sendText/nakira`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': process.env.EVOLUTION_API_KEY },
-      body: JSON.stringify({ number: from, options: { delay: 1000 }, textMessage: { text: reply } })
+      body: JSON.stringify({ number: from, text: reply })
     });
     const sendResult = await sendResponse.json();
     console.log(`📤 Envio resultado:`, JSON.stringify(sendResult));
