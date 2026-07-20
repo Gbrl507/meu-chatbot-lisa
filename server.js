@@ -406,6 +406,7 @@ app.post('/webhook/whatsapp', async (req, res) => {
     const from = body.data.key?.remoteJid?.replace('@lid', '@s.whatsapp.net') || body.data.key?.remoteJid;
     const fromMe = body.data.key?.fromMe;
     if (fromMe) return res.sendStatus(200);
+    if (from.endsWith('@g.us')) return res.sendStatus(200);
     console.log(`📱 WhatsApp de ${from}: ${message}`);
     const tenant = await Tenant.findOne();
     if (!tenant) return res.sendStatus(200);
@@ -418,6 +419,10 @@ app.post('/webhook/whatsapp', async (req, res) => {
     const strategy = strategyEngine(state, score, userHistories[userId]);
     const systemPrompt = promptComposer({ userId, memory: userMemory[userId], state, strategy, score, context: tenant.trainingData, role: tenant.systemPromptBase, isOwner: false, tenantName: tenant.name });
     const reply = await callGemini(systemPrompt, userHistories[userId], 0.2);
+    if (!reply) {
+      console.log(`⚠️ Todos os LLMs falharam para ${from}, sem resposta enviada`);
+      return res.sendStatus(200);
+    }
     pushToHistory(userId, 'assistant', reply);
     const sendResponse = await fetch(`${process.env.EVOLUTION_API_URL}/message/sendText/nakira`, {
       method: 'POST',
@@ -426,12 +431,11 @@ app.post('/webhook/whatsapp', async (req, res) => {
     });
     const sendResult = await sendResponse.json();
     console.log(`📤 Envio resultado:`, JSON.stringify(sendResult));
-    console.log(`✅ Kira respondeu para ${from}: ${reply}`);
+    console.log(`✅ Nakira respondeu para ${from}: ${reply}`);
     res.sendStatus(200);
   } catch (err) {
     console.error('❌ Webhook WhatsApp:', err);
     res.sendStatus(500);
   }
 });
-
-app.listen(PORT, () => console.log(`🚀 KIRA ON - PORTA ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 NAKIRA ON - PORTA ${PORT}`));
